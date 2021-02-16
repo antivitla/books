@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Гегель. Наука логики</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="book.css">
+</head>
+<body>
+
+<article class="book">
+  <!-- (1) Combine book parts -->
+
+  <script>
+    importBookPart('hegel--nauka-logiki/k-voprosu-o-dialektike.html');
+    importBookPart('hegel--nauka-logiki/predislovie-1.html');
+    importBookPart('hegel--nauka-logiki/predislovie-2.html');
+    importBookPart('hegel--nauka-logiki/vvedenie.html');
+    // insertBookPart('intro') from template
+
+    function importBookPart(url) {
+      fetch(`${url}`, {
+        headers: {
+          'Content-Type': 'text/html'
+        }
+      }).then(response => response.text()).then(text => {
+        const content = text.match(/<body>(.+)<\/body>/s)?.[1]; // extract body contents
+        if (content) {
+          const template = document.createElement('template');
+          template.innerHTML = content;
+          template.id = (
+            template.content.children[0].id || url.replace(/[^\w]/g, '-')
+          ) + '-template';
+          document.body.appendChild(template); // save template
+          Array.from(document.scripts).slice(-1)[0].parentElement.appendChild(
+            template.content.cloneNode(true)
+          ); // insert text in DOM
+        }
+      });
+    }
+  </script>
+  <!-- (2) Entry point (from url) -->
+</article>
+
+</body>
+</html>

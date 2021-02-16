@@ -1,0 +1,347 @@
+@import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url("https://use.typekit.net/nml1xlk.css");
+
+html, body {
+  font-size: 16px;
+  line-height: 1.75;
+  background-color: whitesmoke;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  html, body {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 1024px) {
+  html, body {
+    font-size: 20px;
+  }
+}
+
+.book {
+  font-family: "Old Standard TT", "Times New Roman", serif;
+  font-weight: 300;
+  font-style: normal;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 1rem;
+  box-sizing: border-box;
+  max-width: 43rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.book strong {
+  font-weight: 600;
+}
+
+.book p {
+  margin: 1rem 0;
+}
+
+.book section > p:not([class]) {
+  text-indent: 2.5rem;
+}
+
+/* Headers */
+
+.book header {
+  font-family: "Old Standard TT", "Playfair Display", serif;
+}
+
+.book h1,
+.book h2,
+.book h3,
+.book h4,
+.book h5,
+.book h6,
+.book .h7,
+.book .h8 {
+  color: #B35E54;
+  margin: 1rem 0;
+}
+
+.book h1 {
+  font-size: calc(6rem / 3 + 0.5rem);
+  word-break: break-word;
+  line-height: 1.125;
+  font-weight: 900;
+}
+
+.book h2 {
+  font-size: calc(3.75rem / 3 + 0.5rem);
+}
+
+.book h3 {
+  font-size: calc(3rem / 3 + 0.5rem);
+}
+
+.book h4 {
+  font-size: calc(2.125rem / 3 + 0.5rem);
+  font-weight: inherit;
+}
+
+.book h5 {
+  font-size: calc(1.5rem / 3 + 0.5rem);
+  color: inherit;
+}
+
+.book h6 {
+  font-size: calc(1.125rem / 3 + 0.5rem);
+  color: inherit;
+  font-weight: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.125rem;
+}
+
+.book .h7 {
+  display: block;
+  font-size: 0.9rem;
+  margin: 2rem 0 1rem 0;
+  font-weight: bold;
+  /* text-decoration: underline; */
+  color: inherit;
+  font-style: italic;
+  font-family: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.book .h8 {
+  display: block;
+  font-size: 0.75rem;
+  margin: 2rem 0 1rem 0;
+  font-weight: bold;
+  /* text-decoration: underline; */
+  color: inherit;
+  /* font-style: italic; */
+  font-family: inherit;
+  letter-spacing: 0.075rem;
+  text-transform: inherit;
+}
+
+/* Complex header */
+
+.book header {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.book header p {
+  margin: 0;
+}
+
+.book header .author,
+.book header .prefix {
+  order: -1;
+}
+
+.book header .outline-description {
+  font-style: italic;
+  order: 1;
+}
+
+.book header h1 ~ *,
+.book header h2 ~ *,
+.book header h3 ~ *,
+.book header h4 ~ *,
+.book header h5 ~ * {
+  color: #B35E54;
+}
+
+.book header h1 + p {
+  margin-bottom: -0.75rem;
+  font-size: calc(3rem / 3 + 0.5rem);
+  /*color: #B35E54;*/
+}
+
+.book header h1 ~ :not(.author):not(.prefix) {
+  margin-bottom: 1rem;
+}
+
+.book header h2 ~ p {
+  margin-bottom: -0.75rem;
+  font-size: calc(2.125rem / 3 + 0.5rem);
+  /*color: #B35E54;*/
+}
+
+.book header h2 ~ :not(.author):not(.prefix) {
+  margin-bottom: 1.5rem;
+  font-size: smaller;
+  font-weight: bold;
+}
+
+.book header h3 ~ p {
+  margin-bottom: -0.75rem;
+  font-size: calc(1.5rem / 3 + 0.5rem);
+  /*color: #B35E54;*/
+}
+
+.book header h4 ~ p {
+  margin-bottom: -0.75rem;
+  font-size: calc(1.125rem / 3 + 0.5rem);
+  /*color: #B35E54;*/
+}
+
+.book header h5 ~ p {
+  margin-bottom: -0.75rem;
+  font-size: calc(1rem / 3 + 0.5rem);
+  /*color: #B35E54;*/
+}
+
+.book header h6 {
+  margin-bottom: 0;
+}
+
+.book header h6 ~ p {
+  margin-bottom: -0.75rem;
+  margin-top: 0;
+  opacity: 0.6;
+  font-size: calc(0.875rem / 3 + 0.5rem);
+  color: inherit;
+}
+
+.book p + h6,
+.book p + h5,
+.book p + h4,
+.book p + h3,
+.book p + h2,
+.book p + h1 {
+  margin-top: 2rem;
+}
+
+/* Sections */
+
+.book section {
+  margin: 3rem 0;
+}
+
+.book header + section {
+  margin-top: 1rem;
+}
+
+.book h1 + section,
+.book h2 + section,
+.book h3 + section,
+.book h4 + section,
+.book h5 + section,
+.book h6 + section {
+  margin-top: 1rem;
+}
+
+/* Footer */
+
+.book footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: smaller;
+}
+
+/* Footnotes */
+
+.book a.footnote {
+  font-size: 75%;
+  position: relative;
+  top: -0.5em;
+}
+
+.book div.footnote,
+.book p.footnote {
+  opacity: 0.625;
+  font-size: 0.875em;
+  padding-left: 3em;
+  position: relative;
+}
+
+.book p.footnote > span:first-child,
+.book div.footnote > span:first-child {
+  position: absolute;
+  right: calc(100% - 2rem);
+  display: block;
+}
+
+/* Math */
+
+.book .math {
+  font-style: italic;
+}
+
+.book .fraction sup {
+  font-size: 75%;
+  vertical-align: baseline;
+  position: relative;
+  top: -0.625em;
+}
+
+.book .fraction sub {
+  font-size: 75%;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.375em;
+}
+
+/* Various unsorted */
+
+.book .poem {
+  margin: 1rem 0 1rem 3rem;
+}
+
+.book .annotation {
+  /* text-align: right; */
+  padding-right: 3rem;
+  font-style: italic;
+  font-size: calc(1rem * 0.875);
+}
+
+.book .red {
+  color: #B35E54;
+}
+
+.book .center {
+  text-align: center;
+}
+
+.book .right {
+  text-align: right;
+}
+
+.book .divider {
+  text-align: center;
+  margin: 3rem 0 2rem 0;
+}
+
+.book .sparse {
+  letter-spacing: 0.125em;
+}
+
+.book .border-single {
+  border: solid 1px;
+  padding: 1rem;
+}
+
+.book .border-double {
+  border: double 4px;
+  padding: 1rem;
+}
+
+.book .side-note {
+  background-color: white;
+}
+
+.book .side-note:before {
+  content: attr(title);
+  float: left;
+  margin-right: 1rem;
+  padding-right: 1rem;
+  min-height: 4.5rem;
+  display: flex;
+  align-items: center;
+  border-right: double 4px;
+  text-indent: 0;
+}
+

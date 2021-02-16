@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Маркс. Капитал</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<!-- (1) Combine book parts -->
+<script src="h.js"></script>
+<script>
+  const book = [
+    {
+      raw: h('header', [
+        h('h1', 'Капитал'),
+        h('p.subheader', 'Критика политической экономии'),
+        h('p.author', 'Карл Маркс')
+      ])
+    },
+    {import: 'from-institute'},
+    {import: 'foreword-1'},
+    {import: 'afterword-2'},
+    {import: 'foreword-french'},
+    {import: 'afterword-french'},
+    {import: 'foreword-3'},
+    {import: 'foreword-english'},
+    {import: 'foreword-4'},
+    {
+      // Книга первая
+      section: [
+        {
+          raw: h('header', [
+            h('h2', 'Процесс производства капитала'),
+            h('p.prefix', 'Книга первая')
+          ])
+        },
+        {
+          // Отдел первый
+          section: [
+            {
+              raw: h('header', [
+                h('h3', 'Товар и деньги'),
+                h('p.prefix', 'Отдел первый')
+              ])
+            },
+            {
+              section: [
+                {import: 'glava-1--tovar'},
+                {import: 'glava-2--process-obmena'},
+                {import: 'glava-3--dengi-ili-obraschenie-tovarov'},
+              ]
+            }
+          ]
+        },
+        {
+          // Отдел второй
+          section: [
+            {
+              raw: h('header', [
+                h('h3', 'Превращение денег в капитал'),
+                h('p.prefix', 'Отдел второй')
+              ])
+            },
+            {
+              section: [
+                {import: 'glava-4--prevraschenie-deneg-v-kapital'}
+              ]
+            }
+          ]
+        },
+        {
+          // Отдел третий
+          section: [
+            {
+              raw: h('header', [
+                h('h3', 'Производство абсолютной прибавочной стоимости'),
+                h('p.prefix', 'Отдел третий'),
+              ])
+            },
+            {
+              section: [
+                {import: 'glava-5--process-truda-i-vozrastania-stoimosti'},
+                {import: 'glava-6--postoyannyi-i-peremennyi-kapital'},
+                {import: 'glava-7--norma-pribavochnoy-stoimosti'},
+                {import: 'glava-8--rabochiy-den'},
+                {import: 'glava-9--norma-i-massa-pribavochnoy-stoimosti'},
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ];
+</script>
+
+</body>
+</html>
