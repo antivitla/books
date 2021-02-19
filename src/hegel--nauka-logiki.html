@@ -5,41 +5,20 @@
   <title>Гегель. Наука логики</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="book.css">
+  <!-- (3) Book scripts -->
+  <script src="book-part.js"></script>
+  <!-- <script src="book-focus.js"></script> -->
 </head>
 <body>
 
 <article class="book">
   <!-- (1) Combine book parts -->
-
-  <script>
-    importBookPart('hegel--nauka-logiki/k-voprosu-o-dialektike.html');
-    importBookPart('hegel--nauka-logiki/predislovie-1.html');
-    importBookPart('hegel--nauka-logiki/predislovie-2.html');
-    importBookPart('hegel--nauka-logiki/vvedenie.html');
-    // insertBookPart('intro') from template
-
-    function importBookPart(url) {
-      fetch(`${url}`, {
-        headers: {
-          'Content-Type': 'text/html'
-        }
-      }).then(response => response.text()).then(text => {
-        const content = text.match(/<body>(.+)<\/body>/s)?.[1]; // extract body contents
-        if (content) {
-          const template = document.createElement('template');
-          template.innerHTML = content;
-          template.id = (
-            template.content.children[0].id || url.replace(/[^\w]/g, '-')
-          ) + '-template';
-          document.body.appendChild(template); // save template
-          Array.from(document.scripts).slice(-1)[0].parentElement.appendChild(
-            template.content.cloneNode(true)
-          ); // insert text in DOM
-        }
-      });
-    }
-  </script>
+  <book-part src="hegel--nauka-logiki/k-voprosu-o-dialektike.html"></book-part>
+  <book-part active src="hegel--nauka-logiki/predislovie-1.html"></book-part>
+  <book-part src="hegel--nauka-logiki/predislovie-2.html"></book-part>
+  <book-part id="vvedenie(???)" src="hegel--nauka-logiki/vvedenie.html"></book-part>
   <!-- (2) Entry point (from url) -->
+  <book-focus part="vvedenie(???)" cursor="5p6l58s"></book-focus>
 </article>
 
 </body>
