@@ -7,9 +7,8 @@ class BookPartElement extends HTMLElement {
         :host { 
           display: none;
         }
-         
         :host([active]:not([active="false"])) {
-          display: inherit;
+          display: block;
         }
       </style>
       <slot></slot>

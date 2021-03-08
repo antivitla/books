@@ -1,3 +1,5 @@
+const { customHtmlPage, isRendered } = require('./utils');
+
 describe('book-part', () => {
   it('is displayed only if active', () => {
     cy.document().then(d => {
@@ -85,33 +87,3 @@ describe('book-part', () => {
     cy.get('book-part > template').should('have.length', 1);
   });
 });
-
-//
-// Utils for testing
-//
-
-function isRendered(element) {
-  return (
-    element instanceof HTMLElement
-      ? element
-      : element.get(0)
-  ).getClientRects().length > 0;
-}
-
-function customHtmlPage(body, assets = []) {
-  return `
-    <!doctype html>
-    <html lang="en">
-    <head>
-      <title></title>
-
-    </head>
-    <body>
-      ${assets
-        .filter(asset => asset.match(/\.js$/))
-        .map(asset => `<script src="../src/${asset}"></script>`)
-        .join('')}
-      ${body}
-    </body>
-    </html>`;
-}
