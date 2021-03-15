@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "test:dev": "jest --watch",
+    "test": "jest .+\\.test\\.js$",
+    "test:dev": "jest .+\\.test\\.js$ --watch",
     "test:e2e": "cypress open"
   },
   "repository": {

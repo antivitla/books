@@ -4,7 +4,9 @@
   <meta charset="utf-8">
   <title>Test infinite book scroll</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="../../src/book-part.js"></script>
+  <script src="../../src/slug.js"></script>
+  <script src="../../src/binary-search.js"></script>
+  <script src="../../src/book-fragment.js"></script>
   <script src="../../src/book-scroll.js"></script>
   <style>
     body {
@@ -55,26 +57,26 @@
     // Scroll root
     const bookScroll = document.querySelector('book-scroll');
     bookScroll.setAttribute(
-      'margin', rootMargin.match(/^\d+$/) ? `${rootMargin}px 0px` : rootMargin
+      'root-margin', rootMargin.match(/^\d+$/) ? `${rootMargin}px 0px` : rootMargin
     );
 
     // Add/remove content
     bookScroll.addEventListener('book-scroll-next', event => {
       if (generateNext) {
         console.log('book-scroll-next');
-        event.target.addNextPart(generatePart(`part-id-${event.target.children.length}`))
+        event.target.addNextSection(generatePart(`part-id-${event.target.children.length}`))
       }
     });
     bookScroll.addEventListener('book-scroll-previous', event => {
       if (generatePrevious) {
         console.log('book-scroll-previous');
-        event.target.addPreviousPart(generatePart(`part-id-${event.target.children.length}`))
+        event.target.addPreviousSection(generatePart(`part-id-${event.target.children.length}`))
       }
     });
 
     // Generate parts
     function generatePart(id) {
-      const part = document.createElement('book-part');
+      const part = document.createElement('book-fragment');
       if (!initiallyInactive) {
         part.setAttribute('active', '');
       }
@@ -97,7 +99,7 @@
         const lines = text.split('\\n\\n');
         const parts = Array.from(bookScroll.querySelectorAll('.part'));
         parts.forEach((part, index) => {
-          part.textContent = lines[index];
+          part.innerHTML = `<div>${lines[index]}</div>`;
         });
       });
   }());

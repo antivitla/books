@@ -1,6 +1,8 @@
+const HTMLBookFragmentElement = require('../../src/book-fragment');
+
 describe('book-scroll', () => {
   function customPage({count = 30, size = 10, margin = 1000, generateNext = false, generatePrevious = false} = {}) {
-    return `http://localhost:63342/books.git/cypress/integration/book-scroll.e2e.html?count=${count}&size=${size}&margin=${margin}&generateNext=${generateNext}&generatePrevious=${generatePrevious}`;
+    return `http://localhost:8887/cypress/integration/book-scroll.e2e.html?count=${count}&size=${size}&margin=${margin}&generateNext=${generateNext}&generatePrevious=${generatePrevious}`;
   }
 
   beforeEach(() => {
@@ -94,6 +96,10 @@ describe('book-scroll', () => {
     cy.get('book-scroll').scrollTo('bottom', {duration: 500});
     cy.wait(100);
     cy.get('book-scroll').scrollTo('bottom', {duration: 500});
+    cy.wait(100);
+    cy.get('book-scroll').scrollTo('bottom', {duration: 500});
+    cy.wait(100);
+    cy.get('book-scroll').scrollTo('bottom', {duration: 500});
   });
 
   it('issue \'prev\' event if scroll hit first visible item', done => {
@@ -112,22 +118,38 @@ describe('book-scroll', () => {
     cy.wait(500);
   });
 
-  it('while we scroll up/down visible content, new content appear', () => {
+  xit('while we scroll up/down visible content, new content appear', () => {
     cy.visit(customPage({count: 4, size: 110, margin: 200, generateNext: true}));
-    cy.get('book-scroll > book-part').should('have.length', 4);
+    cy.get('book-scroll > book-fragment').should('have.length', 4);
     cy.get('book-scroll').scrollTo('bottom');
-    cy.get('book-scroll > book-part').should('have.length', 5);
+    cy.wait(100);
+    cy.get('book-scroll > book-fragment').should('have.length', 5);
   });
 
   it('when we scroll up/down, old content inactivates', () => {
     cy.visit(customPage({count: 10, size: 100, margin: 20, inactive: true}));
     cy.wait(100);
-    cy.get('book-scroll > book-part[active]:first-child').should('have.length', 1);
-    cy.get('book-scroll > book-part:last-child:not([active]').should('have.length', 1);
+    cy.get('book-scroll > book-fragment[active]:first-child').should('have.length', 1);
+    cy.get('book-scroll > book-fragment:last-child:not([active]').should('have.length', 1);
     cy.get('book-scroll').scrollTo('bottom');
     cy.wait(100);
     cy.get('book-scroll').scrollTo('bottom');
-    cy.get('book-scroll > book-part[active]:first-child').should('have.length', 0);
+    cy.get('book-scroll > book-fragment[active]:first-child').should('have.length', 0);
+  });
+
+  it('emit \'book-scroll-position\' event on scroll end', done => {
+    cy.visit(customPage({count: 10, size: 100, margin: 100}));
+    cy.get('book-scroll').then($el => {
+      $el.get(0).addEventListener('book-scroll-position', event => {
+        let { fragment, fragmentChild, index } = event.detail.position;
+        expect(fragment.constructor.name.match(/^HTML.+Element$/)).to.be.ok;
+        expect(fragmentChild.constructor.name.match(/^HTML.+Element$/)).to.be.ok;
+        expect(index[0]).to.be.finite;
+        expect(index[1]).to.be.finite;
+        done();
+      });
+    });
+    cy.get('book-scroll').scrollTo(0, 300);
   });
 
 });

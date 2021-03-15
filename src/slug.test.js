@@ -1,6 +1,4 @@
-require('./slug');
-
-const {slug} = window;
+const slug = require('./slug');
 
 test('slug is imported', () => {
   expect(slug).toBeDefined();
@@ -17,6 +15,6 @@ test('replace whitespace', () => {
 
 test('replace punctuations and other non-word chars', () => {
   expect(slug('привет, как дела. &mdash; Спросил "зайчик».')).toEqual(
-    'privet-kak-dela---sprosil-zaychik'
+    'privet--kak-dela--sprosil-zaychik'
   );
 });
