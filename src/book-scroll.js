@@ -36,7 +36,7 @@
     }
 
     static get observedAttributes () {
-      return ['root-margin'];
+      return ['activation-margin'];
     }
 
     // get ignoreIntersection () {
@@ -47,31 +47,40 @@
     //   this.setAttribute('ignore-intersection', ignore ? 'true' : 'false');
     // }
 
-    get rootMargin () {
-      return this.getAttribute('root-margin');
+    // Is set like regular margin px: '2000px 0px 2000px 0px'
+    get activationMargin () {
+      return this.getAttribute('activation-margin')
+    }
+    set activationMargin (margin) {
+      this.setAttribute('activation-margin', margin);
     }
 
-    set rootMargin (rootMargin) {
-      this.setAttribute('root-margin', rootMargin);
+    // Is set relatively to current view height: 0.1, for example
+    get currentViewMargin () {
+      return parseFloat(this.getAttribute('current-view-margin') || 0, 10)
+    }
+    set currentViewMargin (margin) {
+      this.setAttribute('current-view-margin', margin);
     }
 
     connectedCallback () {
-      this.rootMargin = this.rootMargin || '1000px 0px 1000px 0px';
-      this.addEventListener('book-scroll-intersection', this.handleScrollIntersection);
+      this.activationMargin = this.activationMargin || '2000px 0px 2000px 0px';
+      this.currentViewMargin = this.currentViewMargin || 0.1;
       // this.initSentinelIntersectionObserver();
-      this.addEventListener('book-scroll-stopped', this.trackScrollPosition);
-      this.addEventListener('scroll', this.trackScrollStopped);
+      this.addEventListener('book-scroll-intersection', this.handleScrollIntersection);
+      this.addEventListener('scroll', this.debounceEmitScrollPosition);
     }
 
     disconnectedCallback () {
-      this.observeSentinel.disconnect();
-      delete this.observeSentinel;
-      this.removeEventListener('book-scroll-stopped', this.trackScrollPosition);
-      this.removeEventListener('scroll', this.trackScrollStopped);
+      if (this.observeSentinel) {
+        this.observeSentinel.disconnect();
+        delete this.observeSentinel;
+      }
+      this.removeEventListener('scroll', this.debounceEmitScrollPosition);
     }
 
     attributeChangedCallback (name, oldValue, newValue) {
-      if (name === 'root-margin' && newValue !== oldValue) {
+      if (name === 'activation-margin' && newValue !== oldValue) {
         this.initSentinelIntersectionObserver();
       }
     }
@@ -82,7 +91,7 @@
       }
       this.observeSentinel = new IntersectionObserver(this.onSentinelIntersection.bind(this), {
         root: this,
-        rootMargin: this.rootMargin,
+        rootMargin: this.activationMargin,
         threshold: 0
       });
       this.observeSentinel.observe(this.shadowRoot.querySelector('.book-scroll-sentinel.top'));
@@ -90,7 +99,6 @@
     }
 
     onSentinelIntersection (entries) {
-      console.log(entries); // Debug
       // if (this.ignoreIntersection) {
       //   this.ignoreIntersection = false;
       //   return;
@@ -219,14 +227,14 @@
           });
         }, {
           root: this,
-          rootMargin: this.rootMargin,
+          rootMargin: this.activationMargin,
           threshold: [0, 1]
         });
         target.observeEnter.observe(target);
       }
     }
 
-    // When element start leaving view borders (with rootMargin),
+    // When element start leaving view activation borders (with activationMargin),
     // we want to wait until it fully leave it. So we setup
     // observer to watch this event once, and only then
     // deactivate section.
@@ -260,7 +268,7 @@
           });
         }, {
           root: this,
-          rootMargin: this.rootMargin,
+          rootMargin: this.activationMargin,
           threshold: 0
         });
         target.observeLeave.observe(target);
@@ -279,6 +287,100 @@
     //   this.addLeaveObserverTo(section, this.handleFullLeave.bind(this));
     // }
 
+    debounceEmitScrollPosition () {
+      clearTimeout(this.__scrollStoppedTimeout__);
+      this.__scrollStoppedTimeout__ = setTimeout(() => {
+        this.dispatchEvent(new CustomEvent('book-scroll-position', {
+          bubbles: true,
+          detail: {
+            position: this.getScrollPosition()
+          }
+        }));
+      }, 200);
+    }
+
+    getScrollPosition () {
+      const currentViewMargin = this.currentViewMargin * this.offsetHeight;
+      const fragmentPosition = this.getScrollFragmentPosition(currentViewMargin);
+      const fragmentChildPosition = this.getScrollFragmentChildPosition(
+        currentViewMargin,
+        fragmentPosition.element
+      );
+      return {
+        fragment: fragmentPosition.element,
+        fragmentChild: fragmentChildPosition.element,
+        fragmentChildTop: fragmentChildPosition.top,
+        index: [fragmentPosition.index, fragmentChildPosition.index],
+      }
+    }
+
+    getScrollFragmentPosition (currentViewMargin = 0) {
+      const activeFragments = Array.from(this.querySelectorAll('book-fragment[active]'));
+      const scrollFragment = activeFragments.slice(
+        BinarySearch(activeFragments, null, function (fragment, value, index) {
+          const rect = fragment.getBoundingClientRect();
+          if (rect.top <= currentViewMargin && rect.bottom > currentViewMargin) {
+            return 0;
+          } else if (rect.top > currentViewMargin) {
+            return 1;
+          } else if (rect.bottom <= currentViewMargin) {
+            return -1;
+          }
+        })
+      )[0];
+      return {
+        element: scrollFragment,
+        index: Array.from(this.children).indexOf(scrollFragment)
+      };
+    }
+
+    getScrollFragmentChildPosition (currentViewMargin = 0, fragment) {
+      const fragmentChildren = Array.from(fragment.children);
+      let rect;
+      const fragmentChild = fragmentChildren.slice(
+        BinarySearch(fragmentChildren, null, function (child, value, index) {
+          rect = child.getBoundingClientRect();
+          let result;
+
+          // If first element and is lower (than viewport border),
+          // or last element and is higher,
+          // or intersecting viewport border
+          if (
+            (index === 0 && rect.top >= currentViewMargin) ||
+            (index === fragmentChildren.length - 1 && rect.bottom <= currentViewMargin) ||
+            (rect.top <= currentViewMargin && rect.bottom > currentViewMargin)
+          ) {
+            return 0;
+          }
+
+          // If totally higher than viewport border
+          else if (rect.bottom <= currentViewMargin){
+            return -1;
+          }
+
+          // Detect 'holes' in position (e.g caused by margins between elements),
+          // which may be catched by comparing with previous element's position.
+          else if (
+            rect.top >= currentViewMargin &&
+            child.previousElementSibling?.getBoundingClientRect().bottom <= currentViewMargin
+          ) {
+            return 0;
+          }
+
+          // rect.top > 0
+          else {
+            return 1;
+          }
+        })
+      )[0];
+      console.log(rect);
+      return {
+        element: fragmentChild,
+        index: fragmentChildren.indexOf(fragmentChild),
+        top: rect.top / this.offsetHeight
+      };
+    }
+
     getBooleanAttribute (name) {
       const attr = this.getAttribute(name);
       return attr === 'true' || attr === '' || (attr && attr !== 'false') || attr === name;
@@ -291,89 +393,6 @@
       } else if (attr !== null && attr !== undefined && !value) {
         this.removeAttribute(name);
       }
-    }
-
-    trackScrollStopped () {
-      clearTimeout(this.__scrollStopped__)
-      this.__scrollStopped__ = setTimeout(() => {
-        this.dispatchEvent(new CustomEvent('book-scroll-stopped', {
-          bubbles: true
-        }));
-      }, 200);
-    }
-
-    trackScrollPosition () {
-      const fragmentPosition = this.getScrollFragmentPosition();
-      const fragmentChildPosition = this.getScrollFragmentChildPosition(fragmentPosition.element)
-      this.dispatchEvent(new CustomEvent('book-scroll-position', {
-        bubbles: true,
-        detail: {
-          position: {
-            fragment: fragmentPosition.element,
-            fragmentChild: fragmentChildPosition.element,
-            index: [fragmentPosition.index, fragmentChildPosition.index]
-          }
-        }
-      }));
-    }
-
-    getScrollFragmentPosition () {
-      const activeFragments = Array.from(this.querySelectorAll('book-fragment[active]'));
-      const scrollFragment = activeFragments.slice(
-        BinarySearch(activeFragments, null, function (fragment, value, index) {
-          const rect = fragment.getBoundingClientRect();
-          if (rect.top <= 0 && rect.bottom > 0) {
-            return 0;
-          } else if (rect.top > 0) {
-            return 1;
-          } else if (rect.bottom <= 0) {
-            return -1;
-          }
-        })
-      )[0];
-      return {
-        element: scrollFragment,
-        index: Array.from(this.children).indexOf(scrollFragment)
-      };
-    }
-
-    getScrollFragmentChildPosition (fragment) {
-      const fragmentChildren = Array.from(fragment.children);
-      const fragmentChild = fragmentChildren.slice(
-        BinarySearch(fragmentChildren, null, function (child, value, index) {
-          const rect = child.getBoundingClientRect();
-          let result;
-          if (
-            (index === 0 && rect.top >= 0) ||
-            (index === fragmentChildren.length - 1 && rect.bottom <= 0) ||
-            (rect.top <= 0 && rect.bottom > 0)
-          ) {
-            return 0;
-          }
-
-          else if (rect.bottom <= 0){
-            return -1;
-          }
-
-          // Detect 'holes' in position (caused by margin),
-          // meaning we found required place
-          else if (
-            rect.top >= 0 &&
-            child.previousElementSibling?.getBoundingClientRect().bottom <= 0
-          ) {
-            return 0;
-          }
-
-          // rect.top > 0
-          else {
-            return 1;
-          }
-        })
-      )[0];
-      return {
-        element: fragmentChild,
-        index: fragmentChildren.indexOf(fragmentChild)
-      };
     }
 
     // open() {

@@ -86,26 +86,4 @@ describe('book-fragment', () => {
     cy.get('book-fragment > template').should('have.length', 1);
   });
 
-  describe('section id', () => {
-    it('if supplied with src, it will be id', () => {
-      cy.document().then(d => {
-        d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/some-section.html"></book-fragment>', ['slug.js', 'book-fragment.js']));
-        d.close();
-      });
-      cy.get('book-fragment').then($el => {
-        expect($el.attr('id')).to.equal(Slug($el.attr('src')));
-      });
-    });
-
-    it('if no src, id will be random', () => {
-      cy.document().then(d => {
-        d.write(customHtmlPage('<book-fragment>Hello</book-fragment>', ['slug.js', 'book-fragment.js']));
-        d.close();
-      });
-      cy.get('book-fragment').then($el => {
-        expect($el.attr('id')).to.be.ok;
-      });
-    })
-  })
-
 });
