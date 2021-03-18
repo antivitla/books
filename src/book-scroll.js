@@ -39,20 +39,16 @@
       return ['activation-margin'];
     }
 
-    // get ignoreIntersection () {
-    //   return this.getBooleanAttribute('ignore-intersection');
-    // }
-    //
-    // set ignoreIntersection (ignore) {
-    //   this.setAttribute('ignore-intersection', ignore ? 'true' : 'false');
-    // }
-
-    // Is set like regular margin px: '2000px 0px 2000px 0px'
+    // Is set like regular margin px: '2000px 0px'
     get activationMargin () {
-      return this.getAttribute('activation-margin')
+      return this.getAttribute('activation-margin');
     }
     set activationMargin (margin) {
-      this.setAttribute('activation-margin', margin);
+      if (typeof margin === 'number') {
+        this.setAttribute('activation-margin', `${margin}px 0px`);
+      } else {
+        this.setAttribute('activation-margin', margin);
+      }
     }
 
     // Is set relatively to current view height: 0.1, for example
@@ -63,12 +59,21 @@
       this.setAttribute('current-view-margin', margin);
     }
 
+    // Ignore intersection for predictable scroll manipulations
+    get ignoreIntersection () {
+      return this.getBooleanAttribute('ignore-intersection');
+    }
+    set ignoreIntersection (value) {
+      this.setBooleanAttribute('ignore-intersection');
+    }
+
     connectedCallback () {
-      this.activationMargin = this.activationMargin || '2000px 0px 2000px 0px';
+      this.activationMargin = this.activationMargin || `2000px 0px`;
       this.currentViewMargin = this.currentViewMargin || 0.1;
       // this.initSentinelIntersectionObserver();
       this.addEventListener('book-scroll-intersection', this.handleScrollIntersection);
       this.addEventListener('scroll', this.debounceEmitScrollPosition);
+      this.addEventListener('book-fragment-active', this.handleFragmentActive);
     }
 
     disconnectedCallback () {
@@ -77,6 +82,7 @@
         delete this.observeSentinel;
       }
       this.removeEventListener('scroll', this.debounceEmitScrollPosition);
+      this.removeEventListener('book-fragment-active', this.handleFragmentActive);
     }
 
     attributeChangedCallback (name, oldValue, newValue) {
@@ -99,10 +105,10 @@
     }
 
     onSentinelIntersection (entries) {
-      // if (this.ignoreIntersection) {
-      //   this.ignoreIntersection = false;
-      //   return;
-      // }
+      if (this.ignoreIntersection) {
+        return;
+      }
+      console.log(entries);
       entries.forEach(entry => {
         this.dispatchEvent(new CustomEvent('book-scroll-intersection', {
           bubbles: true,
@@ -117,6 +123,10 @@
     }
 
     handleScrollIntersection ({detail}) {
+      if (this.ignoreIntersection) {
+        return;
+      }
+      console.log(detail);
       if (detail.enter) {
         this.handleScrollEnter({detail});
       } else if (detail.leave) {
@@ -159,7 +169,7 @@
         const scrollHeight = this.scrollHeight;
 
         // (2) Activate
-        target.setAttribute('active', '');
+        target.active = true;
 
         // (3) Correct scroll, if target was above view
         const position = target.getBoundingClientRect();
@@ -190,7 +200,7 @@
       const scrollHeight = this.scrollHeight;
 
       // (2) Deactivate
-      target.removeAttribute('active'); // 2) deactivate
+      target.active = false; // 2) deactivate
 
       // (3) Correct scroll, if target was above current view
       if (position.bottom < 0) {
@@ -207,11 +217,13 @@
     addEnterObserverTo (target) {
       if (!target.observeEnter) {
         target.observeEnter = new IntersectionObserver(entries => {
+          if (this.ignoreIntersection) {
+            return;
+          }
           entries.forEach(entry => {
             if (entry.isIntersecting && entry.intersectionRatio === 1) {
               // Disable after use
-              target.observeEnter.disconnect();
-              delete target.observeEnter;
+              this.removeEnterObserverFrom(target);
 
               // Get info to decide where to trigger event (at top or bottom)
               const position = target.getBoundingClientRect();
@@ -241,11 +253,13 @@
     addLeaveObserverTo (target, onLeave) {
       if (!target.observeLeave) {
         target.observeLeave = new IntersectionObserver(entries => {
+          if (this.ignoreIntersection) {
+            return;
+          }
           entries.forEach(entry => {
             if (!entry.isIntersecting) {
               // Disable after use
-              target.observeLeave.disconnect();
-              delete target.observeLeave;
+              this.removeLeaveObserverFrom(target);
 
               // Get info to decide where to trigger event (top or bottom).
               // Get it before removal.
@@ -275,17 +289,70 @@
       }
     }
 
-    // addNextSection (section) {
-    //   this.append(section);
-    //   this.addEnterObserverTo(section);
-    //   this.addLeaveObserverTo(section, this.handleFullLeave.bind(this));
-    // }
-    //
-    // addPreviousSection (section) {
-    //   this.prepend(section);
-    //   this.addEnterObserverTo(section);
-    //   this.addLeaveObserverTo(section, this.handleFullLeave.bind(this));
-    // }
+    removeEnterObserverFrom (target) {
+      if (target.observeEnter) {
+        target.observeEnter.disconnect();
+        delete target.observeEnter;
+      }
+    }
+
+    removeLeaveObserverFrom (target) {
+      if (target.observeLeave) {
+        target.observeLeave.disconnect();
+        delete target.observeLeave;
+      }
+    }
+
+    scrollToFragment (key) {
+      if (typeof key === 'string') {
+        // find fragment by key. Match against 'src', 'id'.
+        console.log('scroll to', key, 'fragment');
+      }
+
+      if (typeof key === 'number') {
+
+        // Deactivate intersection detection
+        this.ignoreIntersection = true;
+
+        // Deactivate all other fragments
+        Array.from(this.children).forEach(child => child.active = false);
+
+        // Activate desired fragment
+        this.children[key].active = true;
+
+        // 1. Check if fragment height is lower then activation margin + scrollHeight.
+        // If lower, activate more at bottom
+        let scrollHeight = this.scrollHeight;
+        let nextFragment = this.children[key].nextElementSibling;
+        while (
+          nextFragment &&
+          this.scrollHeight < this.offsetHeight + parseInt(this.activationMargin, 10)
+        ) {
+          nextFragment.active = true;
+          nextFragment = nextFragment.nextElementSibling;
+          console.log('next');
+        }
+
+        // 2. Check if delta scrollHeight with activated previous fragment
+        // is lower then activation margin. If lower, activate more.
+        scrollHeight = this.scrollHeight;
+        let previousFragment = this.children[key].previousElementSibling;
+        while (
+          previousFragment &&
+          this.scrollHeight - scrollHeight < parseInt(this.activationMargin, 10)
+        ) {
+          previousFragment.active = true;
+          previousFragment = previousFragment.previousElementSibling;
+          console.log('previous');
+        }
+
+        // Activate intersection detection
+        this.ignoreIntersection = false;
+
+        // Scroll to desired fragment
+        this.scrollTop = this.children[key].offsetTop;
+      }
+    }
 
     debounceEmitScrollPosition () {
       clearTimeout(this.__scrollStoppedTimeout__);
@@ -373,7 +440,6 @@
           }
         })
       )[0];
-      console.log(rect);
       return {
         element: fragmentChild,
         index: fragmentChildren.indexOf(fragmentChild),
@@ -394,51 +460,6 @@
         this.removeAttribute(name);
       }
     }
-
-    // open() {
-    //   if (this.children.length) {
-    //     this.addEnterObserverTo(this.children[0]);
-    //     this.addLeaveObserverTo(this.children[0], this.handleFullLeave.bind(this));
-    //     this.children[0].setAttribute('active', '');
-    //   }
-    // }
-    //
-    // close() {
-    //   this.ignoreIntersection = true;
-    //   Array.from(this.children).forEach(child => {
-    //     if (child.observeLeave) {
-    //       child.observeLeave.disconnect();
-    //       delete child.observeLeave;
-    //     }
-    //     if (child.observeEnter) {
-    //       child.observeEnter.disconnect();
-    //       delete child.observeEnter;
-    //     }
-    //     child.removeAttribute('active');
-    //   });
-    // }
-
-    // openAt(position = '') {
-    //   console.log('attempt to scroll');
-    //   // Abort if no children
-    //   if (!this.children.length) {
-    //     return;
-    //   }
-    //
-    //   // Prepare position if format [section, element],
-    //   // where 'section' is string id of the section,
-    //   // and element is index of the element inside this section
-    //   if (!Array.isArray(position)) {
-    //     position = position.split(/\s*,\s*/g);
-    //   }
-    //   console.log(`#${position[0]}`);
-    //   // var section = this.querySelector(`#${position[0]}`);
-    //   // section.setAttribute('active', '');
-    //   // setTimeout(() => {
-    //   //   var element = section.children[position[1]];
-    //   //   console.log(section, element);
-    //   // })
-    // }
   }
 
   customElements.define('book-scroll', HTMLBookScrollElement);

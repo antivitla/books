@@ -59,13 +59,13 @@
     }
 
     attributeChangedCallback (name, previousValue, newValue) {
-      if (name === 'active') {
+      if (name === 'active' && newValue !== previousValue) {
         if (!this.getBooleanAttribute('active') && !this.isWrapped()) {
           this.innerHTML = `<template>${this.innerHTML}</template>`;
         } else if (this.getBooleanAttribute('active') && this.isWrapped()) {
           this.innerHTML = this.innerHTML.slice('<template>'.length, -1 * '</template>'.length);
         }
-      } else if (name === 'src') {
+      } else if (name === 'src' && newValue !== previousValue) {
         fetch(newValue, {
           headers: {
             'Content-Type': 'text/html'
