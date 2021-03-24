@@ -44,18 +44,10 @@
 
     set active (active) {
       this.setBooleanAttribute('active', active);
-      // this.dispatchEvent(new CustomEvent('book-fragment-active', {
-      //   bubbles: true,
-      //   detail: {
-      //     active: active
-      //   }
-      // }));
     }
 
-    connectedCallback () {
-      // if (!this.id) {
-      //   this.id = 'random' + parseInt(Math.random() * 100000, 10);
-      // }
+    get ready () {
+      return this.getAttribute('src') === null || this.getBooleanAttribute('ready');
     }
 
     attributeChangedCallback (name, previousValue, newValue) {
@@ -66,6 +58,7 @@
           this.innerHTML = this.innerHTML.slice('<template>'.length, -1 * '</template>'.length);
         }
       } else if (name === 'src' && newValue !== previousValue) {
+        this.setBooleanAttribute('ready', false);
         fetch(newValue, {
           headers: {
             'Content-Type': 'text/html'
@@ -88,9 +81,11 @@
           } else {
             this.replaceChildren(template);
           }
-          this.dispatchEvent(new CustomEvent('book-fragment-loaded', {
+
+          this.setBooleanAttribute('ready', true);
+          this.dispatchEvent(new CustomEvent('book-fragment-ready', {
             bubbles: true
-          }))
+          }));
         });
       }
     }
