@@ -41,13 +41,23 @@
     get active () {
       return this.getBooleanAttribute('active');
     }
-
     set active (active) {
       this.setBooleanAttribute('active', active);
+      this.dispatchEvent(new CustomEvent('book-fragment-active', {
+        bubbles: true,
+        detail: active
+      }));
     }
 
-    get ready () {
-      return this.getAttribute('src') === null || this.getBooleanAttribute('ready');
+    get loaded () {
+      return this.getBooleanAttribute('loaded');
+    }
+    set loaded (loaded) {
+      this.setBooleanAttribute('loaded', loaded);
+      this.dispatchEvent(new CustomEvent('book-fragment-loaded', {
+        bubbles: true,
+        detail: loaded
+      }));
     }
 
     attributeChangedCallback (name, previousValue, newValue) {
@@ -58,7 +68,7 @@
           this.innerHTML = this.innerHTML.slice('<template>'.length, -1 * '</template>'.length);
         }
       } else if (name === 'src' && newValue !== previousValue) {
-        this.setBooleanAttribute('ready', false);
+        this.loaded = false;
         fetch(newValue, {
           headers: {
             'Content-Type': 'text/html'
@@ -82,10 +92,7 @@
             this.replaceChildren(template);
           }
 
-          this.setBooleanAttribute('ready', true);
-          this.dispatchEvent(new CustomEvent('book-fragment-ready', {
-            bubbles: true
-          }));
+          this.loaded = true;
         });
       }
     }

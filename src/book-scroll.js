@@ -73,7 +73,6 @@
       // this.initSentinelIntersectionObserver();
       this.addEventListener('book-scroll-intersection', this.handleScrollIntersection);
       this.addEventListener('scroll', this.debounceEmitScrollPosition);
-      this.addEventListener('book-fragment-active', this.handleFragmentActive);
     }
 
     disconnectedCallback () {
@@ -82,7 +81,6 @@
         delete this.observeSentinel;
       }
       this.removeEventListener('scroll', this.debounceEmitScrollPosition);
-      this.removeEventListener('book-fragment-active', this.handleFragmentActive);
     }
 
     attributeChangedCallback (name, oldValue, newValue) {
@@ -108,7 +106,6 @@
       if (this.ignoreIntersection) {
         return;
       }
-      console.log(entries);
       entries.forEach(entry => {
         this.dispatchEvent(new CustomEvent('book-scroll-intersection', {
           bubbles: true,
@@ -126,7 +123,6 @@
       if (this.ignoreIntersection) {
         return;
       }
-      console.log(detail);
       if (detail.enter) {
         this.handleScrollEnter({detail});
       } else if (detail.leave) {
@@ -303,55 +299,78 @@
       }
     }
 
-    scrollToFragment (key) {
-      if (typeof key === 'string') {
-        // find fragment by key. Match against 'src', 'id'.
-        console.log('scroll to', key, 'fragment');
+    scrollToPosition (position) {
+      // could be passed string '0, 1, 0.56'
+      // or object { fragment: 0, child: 1, shift: 0.56}
+      let fragment = 0;
+      let child = 0;
+      let shift = 0;
+      if (typeof position === 'string') {
+        position.split(',').map(item => item.trim()).forEach((value, index) => {
+          if (index === 0) {
+            fragment = parseInt(value, 10) || 0;
+          } else if (index === 1) {
+            child = parseInt(value, 10) || 0;
+          } else if (index === 2) {
+            shift = parseFloat(value);
+          }
+        });
+      } else if (typeof position === 'object') {
+        fragment = position.fragment || 0;
+        child = position.child || 0;
+        shift = position.shift || 0;
       }
 
-      if (typeof key === 'number') {
+      // Deactivate intersection detection
+      this.ignoreIntersection = true;
 
-        // Deactivate intersection detection
-        this.ignoreIntersection = true;
+      // Deactivate all other fragments
+      Array.from(this.children).forEach(child => child.active = false);
 
-        // Deactivate all other fragments
-        Array.from(this.children).forEach(child => child.active = false);
+      // Activate desired fragment
+      this.children[fragment].active = true;
 
-        // Activate desired fragment
-        this.children[key].active = true;
+      // 1. Check if fragment height is lower then activation margin + scrollHeight.
+      // If lower, activate more at bottom
+      let scrollHeight = this.scrollHeight;
+      let nextFragment = this.children[fragment].nextElementSibling;
+      while (
+        nextFragment &&
+        this.scrollHeight < this.offsetHeight + parseInt(this.activationMargin, 10)
+      ) {
+        nextFragment.active = true;
+        nextFragment = nextFragment.nextElementSibling;
+      }
 
-        // 1. Check if fragment height is lower then activation margin + scrollHeight.
-        // If lower, activate more at bottom
-        let scrollHeight = this.scrollHeight;
-        let nextFragment = this.children[key].nextElementSibling;
-        while (
-          nextFragment &&
-          this.scrollHeight < this.offsetHeight + parseInt(this.activationMargin, 10)
-        ) {
+      // Check that if we scroll to target fragment bottom, there will be still
+      // some fragments.
+      if (nextFragment) {
+        let total = 0;
+        while (nextFragment && total < parseInt(this.activationMargin, 10)) {
           nextFragment.active = true;
+          total += nextFragment.offsetHeight
           nextFragment = nextFragment.nextElementSibling;
-          console.log('next');
         }
-
-        // 2. Check if delta scrollHeight with activated previous fragment
-        // is lower then activation margin. If lower, activate more.
-        scrollHeight = this.scrollHeight;
-        let previousFragment = this.children[key].previousElementSibling;
-        while (
-          previousFragment &&
-          this.scrollHeight - scrollHeight < parseInt(this.activationMargin, 10)
-        ) {
-          previousFragment.active = true;
-          previousFragment = previousFragment.previousElementSibling;
-          console.log('previous');
-        }
-
-        // Activate intersection detection
-        this.ignoreIntersection = false;
-
-        // Scroll to desired fragment
-        this.scrollTop = this.children[key].offsetTop;
       }
+
+      // 2. Check if delta scrollHeight with activated previous fragment
+      // is lower then activation margin. If lower, activate more.
+      scrollHeight = this.scrollHeight;
+      let previousFragment = this.children[fragment].previousElementSibling;
+      while (
+        previousFragment &&
+        this.scrollHeight - scrollHeight < parseInt(this.activationMargin, 10)
+      ) {
+        previousFragment.active = true;
+        previousFragment = previousFragment.previousElementSibling;
+      }
+
+      // Activate intersection detection
+      this.ignoreIntersection = false;
+
+      // Compute and set scrollTop
+      const target = this.children[fragment].children[child]; // shortcut
+      this.scrollTop = target.offsetTop - (target.offsetHeight * shift);
     }
 
     debounceEmitScrollPosition () {
@@ -359,9 +378,7 @@
       this.__scrollStoppedTimeout__ = setTimeout(() => {
         this.dispatchEvent(new CustomEvent('book-scroll-position', {
           bubbles: true,
-          detail: {
-            position: this.getScrollPosition()
-          }
+          detail: this.getScrollPosition(),
         }));
       }, 200);
     }
@@ -374,10 +391,9 @@
         fragmentPosition.element
       );
       return {
-        fragment: fragmentPosition.element,
-        fragmentChild: fragmentChildPosition.element,
-        fragmentChildTop: fragmentChildPosition.top,
-        index: [fragmentPosition.index, fragmentChildPosition.index],
+        fragment: fragmentPosition.index,
+        child: fragmentChildPosition.index,
+        shift: fragmentChildPosition.shift,
       }
     }
 
@@ -443,7 +459,7 @@
       return {
         element: fragmentChild,
         index: fragmentChildren.indexOf(fragmentChild),
-        top: rect.top / this.offsetHeight
+        shift: rect.top / rect.height
       };
     }
 

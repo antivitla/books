@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Гегель. Наука логики</title>
+  <title>Наука логики. Гегель</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link href="book.css" rel="stylesheet">
@@ -15,7 +15,7 @@
 <body>
 
 <!-- 1. Compose -->
-<book-scroll class="book" ignore-intersection>
+<book-scroll class="book" current-view-margin="0.05" ignore-intersection>
   <book-fragment src="hegel--nauka-logiki/k-voprosu-o-dialektike.html" src-selector="section > *"></book-fragment>
   <book-fragment src="hegel--nauka-logiki/predislovie-k-pervomu-izdaniyu.html" src-selector="section > *"></book-fragment>
   <book-fragment src="hegel--nauka-logiki/predislovie-ko-vtoromu-izdaniyu.html" src-selector="section > *"></book-fragment>
@@ -24,38 +24,28 @@
   <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-1--bytie.html" src-selector="section > *"></book-fragment>
   <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-1--nalichnoe-bytie.html" src-selector="section > *"></book-fragment>
   <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-1--dlya-sebya-bytie.html" src-selector="section > *"></book-fragment>
+  <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-2--velichina-kolichestvo.html" src-selector="section > *"></book-fragment>
+  <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-2--opredelennoe-kolichestvo.html" src-selector="section > *"></book-fragment>
 </book-scroll>
-
 <!-- 2. Open at specified position -->
-<book-router type="query/hash" fragment-key="id/src/index"></book-router>
-
-
-<!-- Кто должен отслеживать загрузку книги? Скроллинг пока успешен -->
 <script>
   const BookScroll = document.querySelector('book-scroll');
 
-  const progress = {
-    current: 0,
-    isFinished () {
-      return this.current >= BookScroll.children.length + 1;
+  document.addEventListener('book-fragment-loaded', (event) => {
+    const children = Array.from(BookScroll.children);
+    if (
+      children.indexOf(event.target) > -1 &&
+      children.filter(child => child.getAttribute('src') && !child.loaded).length === 0
+    ) {
+      BookScroll.scrollToPosition(location.hash.replace(/^#/, ''));
     }
-  };
-
-  function updateProgress () {
-    progress.current += 1;
-    if (progress.isFinished()) {
-      BookScroll.dispatchEvent(new CustomEvent('book-ready'));
-    }
-  }
-
-  BookScroll.addEventListener('book-fragment-loaded', updateProgress);
-  window.addEventListener('load', updateProgress);
-
-  // Do scroll
-  BookScroll.addEventListener('book-ready', () => {
-    console.log('book ready');
-    BookScroll.scrollToFragment(6);
   });
+
+  BookScroll.addEventListener('book-scroll-position', function (event) {
+    location.hash = `#${event.detail.fragment},${event.detail.child},${event.detail.shift.toFixed(4)}`;
+  });
+
+
 </script>
 
 </body>

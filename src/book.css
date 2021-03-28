@@ -1,6 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url("https://use.typekit.net/nml1xlk.css");
 
+/*
+
+Todo:
+- Headers
+  - 80% width (or max-width in px)
+
+*/
+
 html, body {
   font-size: 16px;
   line-height: 1.75;
@@ -38,12 +46,17 @@ html, body {
   font-weight: 600;
 }
 
-.book p {
+.book :not(header):not([class]) > p:not([class]) {
   margin: 1rem 0;
+  text-indent: 2.5rem;
 }
 
 .book section > p:not([class]) {
   text-indent: 2.5rem;
+}
+
+.book ol {
+  padding-left: 3.5rem;
 }
 
 /* Headers */
@@ -230,6 +243,7 @@ html, body {
   font-size: 75%;
   position: relative;
   top: -0.5em;
+  margin: 0 0.25em;
 }
 
 .book div.footnote,

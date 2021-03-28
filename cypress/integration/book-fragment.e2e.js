@@ -86,23 +86,15 @@ describe('book-fragment', () => {
     cy.get('book-fragment > template').should('have.length', 1);
   });
 
-  it('if without src, is ready right away', () => {
-    cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment><span>Hello</span></book-fragment>', ['book-fragment.js']));
-      d.close();
-    });
-    cy.get('book-fragment').then($el => expect($el.get(0).ready).to.be.true);
-  });
-
-  it('if having src, is not ready right away, but ready when loaded', done => {
+  it('if having src, is not loaded right away, but emit event when loaded', done => {
     cy.document().then(d => {
       d.write(customHtmlPage('<book-fragment active src="../cypress/fixtures/section-002.html" src-selector="section > *"></book-fragment>', ['book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment').then($el => {
-      expect($el.get(0).ready).to.be.false;
-      $el.get(0).addEventListener('book-fragment-ready', () => {
-        expect($el.get(0).ready).to.be.true;
+      expect($el.get(0).loaded).to.be.false;
+      $el.get(0).addEventListener('book-fragment-loaded', () => {
+        expect($el.get(0).loaded).to.be.true;
         done();
       });
     });
