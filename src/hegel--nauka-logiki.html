@@ -15,38 +15,211 @@
 <body>
 
 <!-- 1. Compose -->
-<book-scroll class="book" current-view-margin="0.05" ignore-intersection>
-  <book-fragment src="hegel--nauka-logiki/k-voprosu-o-dialektike.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/predislovie-k-pervomu-izdaniyu.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/predislovie-ko-vtoromu-izdaniyu.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/vvedenie.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/kniga-1--s-chego-sleduet-nachinat-nauku.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-1--bytie.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-1--nalichnoe-bytie.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-1--dlya-sebya-bytie.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-2--velichina-kolichestvo.html" src-selector="section > *"></book-fragment>
-  <book-fragment src="hegel--nauka-logiki/kniga-1--otdel-2--opredelennoe-kolichestvo.html" src-selector="section > *"></book-fragment>
-</book-scroll>
-<!-- 2. Open at specified position -->
+<book-scroll class="book" current-view-margin="0.05" ignore-intersection></book-scroll>
 <script>
-  const BookScroll = document.querySelector('book-scroll');
-
-  document.addEventListener('book-fragment-loaded', (event) => {
-    const children = Array.from(BookScroll.children);
-    if (
-      children.indexOf(event.target) > -1 &&
-      children.filter(child => child.getAttribute('src') && !child.loaded).length === 0
-    ) {
-      BookScroll.scrollToPosition(location.hash.replace(/^#/, ''));
-    }
-  });
-
-  BookScroll.addEventListener('book-scroll-position', function (event) {
-    location.hash = `#${event.detail.fragment},${event.detail.child},${event.detail.shift.toFixed(4)}`;
-  });
-
-
+  (function (root, sources) {
+    const fragments = document.createDocumentFragment();
+    sources.list.forEach(filename => {
+      const bookFragment = document.createElement('book-fragment');
+      bookFragment.setAttribute('src-selector', sources.selector);
+      bookFragment.setAttribute('src', `${sources.prefix}${filename}${sources.postfix}`);
+      fragments.append(bookFragment);
+    });
+    root.append(fragments);
+  } (document.querySelector('book-scroll'), {
+    prefix: 'hegel--nauka-logiki/',
+    postfix: '.html',
+    selector: 'section > *',
+    list: [
+      'cover',
+      'k-voprosu-o-dialektike',
+      'predislovie-k-pervomu-izdaniyu',
+      'predislovie-ko-vtoromu-izdaniyu',
+      'vvedenie',
+      // 1
+      'kniga-1--s-chego-sleduet-nachinat-nauku',
+      'kniga-1--otdel-1--bytie',
+      'kniga-1--otdel-1--nalichnoe-bytie',
+      'kniga-1--otdel-1--dlya-sebya-bytie',
+      'kniga-1--otdel-2--velichina-kolichestvo',
+      'kniga-1--otdel-2--opredelennoe-kolichestvo',
+      'kniga-1--otdel-2--kolichestvennoe-otnoshenie',
+      'kniga-1--otdel-3--mera',
+      'kniga-1--otdel-3--realnaya-mera',
+      'kniga-1--otdel-3--stanovlenie-suschnosti',
+      // 2
+      'kniga-2--uchenie-o-suschnosti',
+      'kniga-2--otdel-1--suschnost-kak-refleksiya-v-sebe-samoy',
+      'kniga-2--otdel-1--opredelennye-suschnosti-ili-opredeleniya-refleksii',
+      'kniga-2--otdel-1--osnovanie',
+      'kniga-2--otdel-2--suschestvovanie',
+      'kniga-2--otdel-2--yavlenie',
+      'kniga-2--otdel-2--suschestvennoe-otnoshenie',
+      'kniga-2--otdel-3--absolyutnoe',
+      'kniga-2--otdel-3--deystvitelnost',
+      'kniga-2--otdel-3--absolyutnoe-otnoshenie',
+      // 3
+      'kniga-3--o-ponyatii-voobsche',
+      'kniga-3--otdel-1--ponyatie',
+      'kniga-3--otdel-1--suzhdenie',
+      'kniga-3--otdel-1--umozaklyuchenie',
+      'kniga-3--otdel-2--obektivnost',
+      'kniga-3--otdel-2--mekhanizm',
+      'kniga-3--otdel-2--khimizm',
+      'kniga-3--otdel-2--teleologiya',
+      'kniga-3--otdel-3--idea',
+      'kniga-3--otdel-3--zhizn',
+      'kniga-3--otdel-3--ideya-poznaniya',
+      'kniga-3--otdel-3--absolyutnaya-ideya',
+      //
+      'o-logike-gegelya'
+    ]
+  }));
 </script>
 
+<!-- 2. Open at specified position -->
+<script>
+  (function (root) {
+    root.addEventListener('book-fragment-loaded', (event) => {
+      if (!root.querySelectorAll('book-fragment[src]:not([loaded])').length) {
+        root.scrollToPosition(location.hash.replace(/^#/, ''));
+      }
+    });
+    root.addEventListener('book-scroll-position', (event) => {
+      console.log(event.detail);
+      location.hash = '#' + [
+        event.detail.fragment,
+        event.detail.child,
+        event.detail.shift.toFixed(4)
+      ].join(',');
+    });
+  } (document.querySelector('book-scroll')));
+</script>
+
+<!-- 3. Collect structure info -->
+<div class="book-scroll-track" style="position: absolute; top: 15px; right: 40px; bottom: 15px; width: 30px; background-color: rgba(0, 0, 0, 0.1);">
+  <div class="book-scroll-position"></div>
+</div>
+<script>
+  (function (root) {
+
+    // Трек это относительная шкала, позиция на которой соответствует
+    // позиции в книге. Позиция это номер фрагмента внутри книги и
+    // номер элемента внутри фрагмента. Поэтому модель трека это
+    // список фрагментов (в порядке следования в книге), для каждого
+    // указан 'размер' (количество элементов в фрагменте). Отношение
+    // количества элементов фрагмента к количеству элементов во всех
+    // фрагментов есть относительных размер фрагмента на треке. И
+    // наоборот, каждой позиции на треке (куда пользователь кликнет)
+    // соответствует определённый фрагмент и элемент внутри фрагмента.
+    class Track {
+      constructor (l) {
+        // this.length = items;
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < l; i++) {
+          const item = document.createElement('div');
+          item.classList.add('book-scroll-track-item');
+          fragment.append(item);
+        }
+        document.querySelector('.book-scroll-track').append(fragment)
+      }
+      items = [];
+      total = 0;
+      addFragment (items, index) {
+        if (typeof index === 'undefined') {
+          throw new Error('Index not given');
+        }
+        this.items[index] = items.length;
+        this.total += items.length;
+        const t = document.querySelector('.book-scroll-track').children;
+        const r = this.getRelativeTrack();
+        for (let i = 1; i < t.length; i++) {
+          t[i].style.height = 100 * r[i - 1] + '%';
+
+        }
+      }
+      getRelativeTrack () {
+        return this.items.map(item => item/this.total);
+      }
+    }
+    const track = new Track(root.querySelectorAll('book-fragment').length);
+    document.querySelector('.book-scroll-track').addEventListener('click', (event) => {
+      const y = event.offsetY / event.target.offsetHeight;
+      let index = 0;
+      let count = 0;
+      const r = track.getRelativeTrack();
+      while (count + r[index] < y) {
+        count += r[index];
+        index += 1;
+      }
+      const child = parseInt(track.items[index] * (y - count) / r[index], 10);
+      console.log('fragment', index, 'child', child);
+      root.scrollToPosition({
+        fragment: index,
+        child: child,
+      });
+    });
+
+    root.addEventListener('book-scroll-position', ({detail}) => {
+      const p = (track.items
+        .slice(0, detail.fragment)
+        .reduce((sum, value) => sum + value, 0) + detail.child) / track.total;
+      document.querySelector('.book-scroll-position')
+        .style.top = 100 * p + '%';
+    });
+
+
+
+    function parseOutline (items) {
+      const outline = [];
+      for (item of items) {
+        // new section?
+        if ([
+          'header',
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6'
+        ].indexOf(item.tagName.toLowerCase()) > -1) {
+          outline.push({
+            header: item,
+            items: 0
+          });
+        } else {
+          outline[outline.length - 1].items += 1;
+        }
+      }
+      return outline;
+    }
+
+    // Process inline fragments
+    Array.prototype.forEach.call(root.querySelectorAll('book-fragment:not([src])'), (fragment) => {
+      const index = Array.prototype.indexOf.call(fragment.parentElement.children, fragment);
+      const children = fragment.active
+        ? fragment.children
+        : fragment.children[0].content.children;
+      const outline = parseOutline(children);
+
+      // Parse track
+      track.addFragment(children, index);
+      console.log(outline);
+    });
+
+    // Process remote fragments on load
+    root.addEventListener('book-fragment-loaded', (event) => {
+      const index = Array.prototype.indexOf.call(event.target.parentElement.children, event.target);
+      const children = event.target.active
+        ? event.target.children
+        : event.target.children[0].content.children;
+      const outline = parseOutline(children);
+
+      // Parse track
+      track.addFragment(children, index);
+      console.log(outline);
+    });
+  } (document.querySelector('book-scroll')));
+</script>
 </body>
 </html>
