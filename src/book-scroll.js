@@ -18,6 +18,12 @@
   'use strict';
 
   class HTMLBookScrollElement extends HTMLElement {
+
+    DEFAULT = {
+      activationMargin: '2000px 0px',
+      currentViewMargin: 0.05
+    };
+
     constructor () {
       super();
       this.attachShadow({mode: 'open'});
@@ -53,7 +59,7 @@
 
     // Is set relatively to current view height: 0.1, for example
     get currentViewMargin () {
-      return parseFloat(this.getAttribute('current-view-margin') || 0, 10)
+      return parseFloat(this.getAttribute('current-view-margin') || this.DEFAULT.currentViewMargin, 10)
     }
     set currentViewMargin (margin) {
       this.setAttribute('current-view-margin', margin);
@@ -68,8 +74,8 @@
     }
 
     connectedCallback () {
-      this.activationMargin = this.activationMargin || `2000px 0px`;
-      this.currentViewMargin = this.currentViewMargin || 0.1;
+      this.activationMargin = this.activationMargin || this.DEFAULT.activationMargin;
+      this.currentViewMargin = this.currentViewMargin || this.DEFAULT.currentViewMargin;
       // this.initSentinelIntersectionObserver();
       this.addEventListener('book-scroll-intersection', this.handleScrollIntersection);
       this.addEventListener('scroll', this.debounceEmitScrollPosition);
