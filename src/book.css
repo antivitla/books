@@ -28,7 +28,7 @@ html, body {
   font-size: 1rem;
   line-height: 1.5;
 
-  padding: 0rem 1rem;
+  padding: 2rem;
   max-width: 41rem;
   margin-left: auto;
   margin-right: auto;
@@ -55,11 +55,7 @@ html, body {
   text-indent: 0;
 }
 
-/* Headers */
-
-.book header {
-  font-family: "Old Standard TT", "Playfair Display", serif;
-}
+/* Header */
 
 .book h1,
 .book h2,
@@ -69,6 +65,7 @@ html, body {
 .book h6,
 .book .h7,
 .book .h8 {
+  font-family: "Old Standard TT", "Playfair Display", serif;
   color: #B35E54;
   margin: 1rem 0;
   text-align: center;
@@ -133,9 +130,8 @@ html, body {
   text-transform: inherit;
 }
 
-/* Complex header */
-
 .book header {
+  font-family: "Old Standard TT", "Playfair Display", serif;
   display: flex;
   flex-direction: column;
   margin: 1rem 0;
@@ -225,14 +221,6 @@ html, body {
   margin-top: 2rem;
 }
 
-/* Footer */
-
-.book footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: smaller;
-}
-
 /* Footnotes */
 
 .book a.footnote {
@@ -277,7 +265,7 @@ html, body {
   top: 0.375em;
 }
 
-/* Various unsorted */
+/* Unsorted */
 
 .book .poem {
   margin: 1rem 0 1rem 3rem;

@@ -1,5 +1,4 @@
 const { customHtmlPage, isRendered } = require('./utils');
-const Slug = require('../../src/slug');
 
 describe('book-fragment', () => {
   it('is displayed only if active', () => {
@@ -86,16 +85,30 @@ describe('book-fragment', () => {
     cy.get('book-fragment > template').should('have.length', 1);
   });
 
-  it('if having src, is not loaded right away, but emit event when loaded', done => {
-    cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment active src="../cypress/fixtures/section-002.html" src-selector="section > *"></book-fragment>', ['book-fragment.js']));
-      d.close();
+  describe('loading and complete logic', () => {
+    it('if no src attribute, is complete right away', () => {
+      cy.document().then(d => {
+        d.write(customHtmlPage('<book-fragment><span>zok</span></book-fragment>', ['book-fragment.js']));
+        d.close();
+      });
+      cy.get('book-fragment').then($el => {
+        expect($el.get(0).complete).to.be.true;
+      });
     });
-    cy.get('book-fragment').then($el => {
-      expect($el.get(0).loaded).to.be.false;
-      $el.get(0).addEventListener('book-fragment-loaded', () => {
-        expect($el.get(0).loaded).to.be.true;
-        done();
+
+    it('if src attribute present, is not complete initially, but complete after load event', done => {
+      cy.document().then(d => {
+        d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/section-002.html></book-fragment>"', ['book-fragment.js']));
+        d.close();
+      });
+      cy.get('book-fragment').then($el => {
+        expect($el.get(0).complete).to.be.false;
+        $el.get(0).addEventListener('load', () => {
+          console.log('load', event);
+          expect($el.get(0)).to.equal(event.target);
+          expect(event.target.complete).to.be.true;
+          done();
+        });
       });
     });
   });

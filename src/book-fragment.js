@@ -26,13 +26,18 @@
           :host {
             display: none;
           }
-          :host([active]:not([active="false"])) {
+          :host([active]) {
             display: block;
+          }
+          :host([active]:not([complete])) {
+            /* pending state styles */
           }
         </style>
         <slot></slot>
       `;
     }
+
+    complete = true;
 
     static get observedAttributes () {
       return ['active', 'src'];
@@ -43,21 +48,6 @@
     }
     set active (active) {
       this.setBooleanAttribute('active', active);
-      this.dispatchEvent(new CustomEvent('book-fragment-active', {
-        bubbles: true,
-        detail: active
-      }));
-    }
-
-    get loaded () {
-      return this.getBooleanAttribute('loaded');
-    }
-    set loaded (loaded) {
-      this.setBooleanAttribute('loaded', loaded);
-      this.dispatchEvent(new CustomEvent('book-fragment-loaded', {
-        bubbles: true,
-        detail: loaded
-      }));
     }
 
     attributeChangedCallback (name, previousValue, newValue) {
@@ -67,8 +57,9 @@
         } else if (this.getBooleanAttribute('active') && this.isWrapped()) {
           this.innerHTML = this.innerHTML.slice('<template>'.length, -1 * '</template>'.length);
         }
-      } else if (name === 'src' && newValue !== previousValue) {
-        this.loaded = false;
+      } else if (name === 'src' && newValue && newValue !== previousValue) {
+        this.complete = false;
+        this.setBooleanAttribute('complete', false);
         fetch(newValue, {
           headers: {
             'Content-Type': 'text/html'
@@ -91,8 +82,12 @@
           } else {
             this.replaceChildren(template);
           }
-
-          this.loaded = true;
+        }).catch(error => {
+          console.error(error);
+        }).finally(() => {
+          this.complete = true;
+          this.setBooleanAttribute('complete', true);
+          this.dispatchEvent(new CustomEvent('load', {bubbles: true}));
         });
       }
     }
@@ -112,7 +107,10 @@
     }
 
     isWrapped () {
-      return this.children.length === 1 && this.children[0].constructor.name === 'HTMLTemplateElement';
+      return (
+        this.children.length === 1 &&
+        this.children[0].constructor.name === 'HTMLTemplateElement'
+      );
     }
   }
 

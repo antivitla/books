@@ -1,4 +1,4 @@
-const HTMLBookFragmentElement = require('../../src/book-fragment');
+// const HTMLBookFragmentElement = require('../../src/book-fragment');
 
 describe('book-scroll', () => {
   function customPage({count = 30, size = 10, margin = 1000, generateNext = false, generatePrevious = false} = {}) {
@@ -137,7 +137,7 @@ describe('book-scroll', () => {
     cy.get('book-scroll > book-fragment[active]:first-child').should('have.length', 0);
   });
 
-  it('emit \'book-scroll-position\' event on scroll end', done => {
+  xit('emit \'book-scroll-position\' event on scroll end', done => {
     cy.visit(customPage({count: 10, size: 100, margin: 1000}));
     cy.get('book-scroll').then($el => {
       $el.get(0).addEventListener('book-scroll-position', event => {
