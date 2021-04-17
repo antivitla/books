@@ -24,9 +24,7 @@
     }
 
     cleanupTasks = [];
-
     complete = false;
-
     MAX_NESTED_DEPTH = 2;
 
     static get observedAttributes () {
@@ -34,7 +32,9 @@
     }
 
     get for () {
-      return document.getElementById(this.getAttribute('for'));
+      if (this.getAttribute('for')) {
+        return document.getElementById(this.getAttribute('for'));
+      }
     }
 
     get position () {
@@ -45,40 +45,38 @@
       this.setPosition(position);
     }
 
-    initFor (id) {
-      const target = document.getElementById(id);
-      if (target) {
-        target.addEventListener('scroll', this.handleScrollBinded);
-        this.cleanupTasks.push(() => {
-          target.removeEventListener('scroll', this.handleScrollBinded);
-        });
-        return true;
-      }
-    }
-
     attributeChangedCallback (name, oldValue, newValue) {
       if (name === 'for') {
         if (newValue && newValue !== oldValue) {
-          while (this.cleanupTasks.length) this.cleanupTasks.pop()();
-          this.complete = this.initFor(newValue);
+          this.complete = this.init();
         }
       }
     }
 
     connectedCallback () {
-      if (!this.complete) {
-        this.complete = this.initFor(this.getAttribute('for'));
-      }
-      if (!this.complete) {
-        document.addEventListener('DOMContentLoaded', () => {
-          this.complete = this.initFor(this.getAttribute('for'));
-        });
-      }
+      if (!this.complete) this.complete = this.init();
+      if (!this.complete) document.addEventListener('DOMContentLoaded', () => {
+        this.complete = this.init();
+      });
     }
 
     disconnectedCallback () {
-      while (this.cleanupTasks.length) {
-        this.cleanupTasks.pop()();
+      while (this.cleanupTasks.length) this.cleanupTasks.pop()();
+    }
+
+    init () {
+      if (this.for) {
+        // Cleanup old
+        while (this.cleanupTasks.length) this.cleanupTasks.pop()();
+        // Add new
+        const target = this.for;
+        target.addEventListener('scroll', this.handleScrollBinded);
+        // Add cleanup
+        this.cleanupTasks.push(() => {
+          target.removeEventListener('scroll', this.handleScrollBinded)
+        });
+        // Notify success
+        return true;
       }
     }
 
@@ -109,8 +107,11 @@
       // Get current focused & 'visible' element's position inside DOM tree
       const position = [];
       let container = this.for;
-      while (container.children.length) {
-        let i = this.getVisibleElementIndex(container, margin)
+      while (container && container.children.length) {
+        let i = this.getVisibleElementIndex(container, margin);
+        if (i < 0) {
+          break;
+        }
         position.push(i);
         container = container.children[i];
         // Exit at max depth === 2
@@ -139,11 +140,13 @@
           break;
         }
       }
-      if (i < position.length) {
-        console.log('shift remained', position);
-      }
+      // Scroll to target
       target.scrollIntoView(true);
-      // Shift?
+      // Scroll more to match shift
+      if (i < position.length) {
+        const y = Math.round(-1 * position[i] * target.offsetHeight);
+        this.for.scrollBy(0, y);
+      }
     }
 
     getVisibleElementIndex(container, margin) {

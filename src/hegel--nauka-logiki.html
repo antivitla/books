@@ -11,9 +11,12 @@
   <script src="book-fragment.js"></script>
   <script src="book-scroll.js"></script>
   <script src="book-scroll-position.js"></script>
+  <script src="book-scroll-control.js"></script>
 </head>
 <body>
 
+
+<book-scroll-position for="hegel--nauka-logiki"></book-scroll-position>
 <book-scroll id="hegel--nauka-logiki">
   <book-fragment class="book" src="hegel--nauka-logiki/cover.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/k-voprosu-o-dialektike.html" src-selector="section > *"></book-fragment>
@@ -54,34 +57,19 @@
   <book-fragment class="book" src="hegel--nauka-logiki/o-logike-gegelya.html" src-selector="section > *"></book-fragment>
 </book-scroll>
 
-<book-scroll-position for="hegel--nauka-logiki"></book-scroll-position>
+<book-scroll-control for="hegel--nauka-logiki" type="url"></book-scroll-control>
 
-<script>
-  document.querySelector('book-scroll-position').addEventListener('change', event => {
-    console.log('position changed', event.detail);
-  });
-</script>
-
-<!--
-Track scroll position inside scrollable container. Have deep nesting (for long elements).
-Given element, watch it's scroll event, or
-Вообще просто имеем контейнер, получить текущую позицию - точнее текущий видимый элемент,
-с указанием глубины и смещения
-
-.getScrollPosition({
-  depth: 2,
-  viewMargin: (from top)
-})
-
-.setScrollPosition({
-  position: '1,2,-0.4'
-})
-
-<book-scroll-position for="hegel-nauka-logiki"></book-scroll-position>
-
-
--->
-
+<style>
+  book-scroll-control {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 25px;
+    background-color: ghostwhite;
+    border: solid black 3px;
+    border-radius: 3px;
+  }
+</style>
 
 </body>
 </html>
