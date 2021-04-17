@@ -20,8 +20,7 @@
   class HTMLBookScrollElement extends HTMLElement {
 
     DEFAULT = {
-      activationMargin: '2000px 0px',
-      currentViewMargin: 0.05
+      activationMargin: '2000px 0px'
     };
 
     constructor () {
@@ -71,14 +70,6 @@
       }
     }
 
-    // Is set relatively to current view height: 0.1, for example
-    get currentViewMargin () {
-      return parseFloat(this.getAttribute('current-view-margin') || this.DEFAULT.currentViewMargin, 10)
-    }
-    set currentViewMargin (margin) {
-      this.setAttribute('current-view-margin', margin);
-    }
-
     // Ignore intersection for predictable scroll manipulations
     get ignoreIntersection () {
       return this.getBooleanAttribute('ignore-intersection');
@@ -89,7 +80,6 @@
 
     connectedCallback () {
       this.activationMargin = this.activationMargin || this.DEFAULT.activationMargin;
-      this.currentViewMargin = this.currentViewMargin || this.DEFAULT.currentViewMargin;
       this.addEventListener('book-scroll-intersection', this.handleScrollIntersection);
       if (!this.observeSentinel) {
         this.initSentinelIntersectionObserver();
@@ -97,6 +87,7 @@
     }
 
     disconnectedCallback () {
+      this.removeEventListener('book-scroll-intersection', this.handleScrollIntersection);
       if (this.observeSentinel) {
         this.observeSentinel.disconnect();
         delete this.observeSentinel;
@@ -318,6 +309,60 @@
         target.observeLeave.disconnect();
         delete target.observeLeave;
       }
+    }
+
+    activateChild (child) {
+      let target;
+      if (typeof child === 'number') {
+        target = this.children[child]
+      } else if (Array.from(this.children).indexOf(child) > -1) {
+        target = child;
+      }
+      if (!target) {
+        throw new Error(`BookScroll: cannot activate ${child}`);
+      }
+      // Deactivate intersection detection
+      this.ignoreIntersection = true;
+      // Deactivate all other fragments
+      Array.from(this.children).forEach(child => child.active = false);
+      // Activate desired fragment
+      target.active = true;
+
+      // 1. Check if fragment height is lower then activation margin + scrollHeight.
+      // If lower, activate more at bottom
+      let nextFragment = target.nextElementSibling;
+      while (
+        nextFragment &&
+        this.scrollHeight < this.offsetHeight + parseInt(this.activationMargin, 10)
+      ) {
+        nextFragment.active = true;
+        nextFragment = nextFragment.nextElementSibling;
+      }
+      // Check that if we scroll to target fragment bottom, there will be still
+      // some fragments.
+      if (nextFragment) {
+        let total = 0;
+        while (nextFragment && total < parseInt(this.activationMargin, 10)) {
+          nextFragment.active = true;
+          total += nextFragment.offsetHeight
+          nextFragment = nextFragment.nextElementSibling;
+        }
+      }
+
+      // 2. Check if delta scrollHeight with activated previous fragment
+      // is lower then activation margin. If lower, activate more.
+      let scrollHeight = this.scrollHeight;
+      let previousFragment = target.previousElementSibling;
+      while (
+        previousFragment &&
+        this.scrollHeight - scrollHeight < parseInt(this.activationMargin, 10)
+      ) {
+        previousFragment.active = true;
+        previousFragment = previousFragment.previousElementSibling;
+      }
+
+      // Activate intersection detection
+      this.ignoreIntersection = false;
     }
   }
 

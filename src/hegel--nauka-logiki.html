@@ -7,6 +7,7 @@
 
   <link href="book.css" rel="stylesheet">
 
+  <script src="binary-search.js"></script>
   <script src="book-fragment.js"></script>
   <script src="book-scroll.js"></script>
   <script src="book-scroll-position.js"></script>
@@ -54,6 +55,12 @@
 </book-scroll>
 
 <book-scroll-position for="hegel--nauka-logiki"></book-scroll-position>
+
+<script>
+  document.querySelector('book-scroll-position').addEventListener('change', event => {
+    console.log('position changed', event.detail);
+  });
+</script>
 
 <!--
 Track scroll position inside scrollable container. Have deep nesting (for long elements).

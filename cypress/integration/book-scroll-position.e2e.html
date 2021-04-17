@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="../../src/book-fragment.js"></script>
   <script src="../../src/book-scroll.js"></script>
+  <script src="../../src/binary-search.js"></script>
   <script src="../../src/book-scroll-position.js"></script>
   <style>
     body {
@@ -42,7 +43,7 @@
 </head>
 <body>
 <book-scroll id="book-scroll"></book-scroll>
-<book-scroll-position for="book-scroll"></book-scroll-position>
+<book-scroll-position for="book-scroll" margin="0.05"></book-scroll-position>
 <script>
   (function () {
     // Mock options
@@ -99,7 +100,9 @@
         const lines = text.split('\\n\\n');
         const parts = Array.from(bookScroll.querySelectorAll('.part'));
         parts.forEach((part, index) => {
-          part.innerHTML = `<div>${lines[index]}</div>`;
+          part.innerHTML = lines[index].split(' ').map(word => {
+            return `<p>${word}</p>`
+          }).join(' ');
         });
       });
   }());

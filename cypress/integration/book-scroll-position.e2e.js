@@ -19,7 +19,7 @@ describe('book-scroll-position', () => {
 
   it('uses \'for\' attribute as target container id', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-scroll-position for="id1"></book-scroll-position><div id="id1">Some content</div>', ['book-scroll-position.js']));
+      d.write(customHtmlPage('<book-scroll-position for="id1"></book-scroll-position><div id="id1">Some content</div>', ['binary-search.js', 'book-scroll-position.js']));
       d.close();
     });
     cy.get('book-scroll-position').then($el => {
@@ -27,13 +27,30 @@ describe('book-scroll-position', () => {
     });
   });
 
-  xit('for simple use-case return first depth children position', () => {
+  it('for simple use-case return first depth children position', () => {
     cy.visit(page({size: 300, count: 10}));
-    cy.get('book-scroll').then($el => {
-      $el.get(0).children[4].scrollIntoView(); // HOW???
-    });
     cy.get('book-scroll-position').then($el => {
-      expect($el.get(0).position[0]).to.equal(5);
+      $el.get(0).position = [4]
+      expect($el.get(0).position[0]).to.equal(4);
+    });
+    cy.get('book-scroll').then($el => {
+      expect($el.get(0).children[4].active).to.be.true;
+    });
+
+    cy.get('book-scroll-position').then($el => {
+      $el.get(0).position = [0]
+      expect($el.get(0).position[0]).to.equal(0);
+    });
+    cy.get('book-scroll').then($el => {
+      expect($el.get(0).children[0].active).to.be.true;
+    });
+
+    cy.get('book-scroll-position').then($el => {
+      $el.get(0).position = [6]
+      expect($el.get(0).position[0]).to.equal(6);
+    });
+    cy.get('book-scroll').then($el => {
+      expect($el.get(0).children[6].active).to.be.true;
     });
   });
 });
