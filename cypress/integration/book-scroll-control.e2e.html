@@ -41,6 +41,17 @@
     .color-8 { background-color: darkkhaki; }
     .color-9 { background-color: darksalmon; }
   </style>
+  <style>
+    book-scroll-control {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 25px;
+      background-color: ghostwhite;
+      border: solid black 3px;
+      border-radius: 3px;
+    }
+  </style>
 </head>
 <body>
 <book-scroll-control for="book-scroll"></book-scroll-control>
@@ -106,6 +117,9 @@
             return `<p>${word}</p>`
           }).join(' ');
         });
+      })
+      .finally(() => {
+        document.querySelector('book-scroll-position').emitPositionChange();
       });
   }());
 </script>

@@ -76,9 +76,8 @@
         const fragments = Array.from(this.forScroll.children);
         if (fragments.filter(child => !child.complete).length) {
           this.forScroll.addEventListener('load', () => {
-            console.log('load')
             if (!fragments.filter(child => !child.complete).length) {
-              this.handleChange({detail: this.forScrollPosition.position});
+              this.forScrollPosition.emitPositionChange();
             }
           })
         }
@@ -88,7 +87,6 @@
     }
 
     handleChange (event) {
-      console.log('change position', event.detail);
       this.innerText = event.detail.map(f => {
         if (Math.abs(f % 1) > 0) {
           return f.toFixed(3);

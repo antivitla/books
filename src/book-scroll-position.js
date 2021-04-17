@@ -25,7 +25,6 @@
 
     cleanupTasks = [];
     complete = false;
-    MAX_NESTED_DEPTH = 2;
 
     static get observedAttributes () {
       return ['for'];
@@ -43,6 +42,10 @@
 
     set position (position) {
       this.setPosition(position);
+    }
+
+    get maxDepth () {
+      return parseInt(this.getAttribute('max-depth'), 10) || 2;
     }
 
     attributeChangedCallback (name, oldValue, newValue) {
@@ -115,7 +118,7 @@
         position.push(i);
         container = container.children[i];
         // Exit at max depth === 2
-        if (position.length >= this.MAX_NESTED_DEPTH) {
+        if (position.length >= this.maxDepth) {
           break;
         }
       }
@@ -132,7 +135,7 @@
       this.for.activateChild(position[0]);
       let i = 0;
       let target = this.for;
-      while (i < position.length && i < this.MAX_NESTED_DEPTH) {
+      while (i < position.length && i < this.maxDepth) {
         if (target.children && target.children[position[i]]) {
           target = target.children[position[i]]
           i += 1;
