@@ -30,10 +30,14 @@
       return ['for'];
     }
 
-    get for () {
+    get scrollElement () {
       if (this.getAttribute('for')) {
         return document.getElementById(this.getAttribute('for'));
       }
+    }
+
+    get maxDepth () {
+      return parseInt(this.getAttribute('max-depth'), 10) || 2;
     }
 
     get position () {
@@ -44,15 +48,9 @@
       this.setPosition(position);
     }
 
-    get maxDepth () {
-      return parseInt(this.getAttribute('max-depth'), 10) || 2;
-    }
-
     attributeChangedCallback (name, oldValue, newValue) {
-      if (name === 'for') {
-        if (newValue && newValue !== oldValue) {
-          this.complete = this.init();
-        }
+      if (name === 'for' && newValue && newValue !== oldValue) {
+        this.complete = this.init();
       }
     }
 
@@ -68,11 +66,11 @@
     }
 
     init () {
-      if (this.for) {
+      if (this.scrollElement) {
         // Cleanup old
         while (this.cleanupTasks.length) this.cleanupTasks.pop()();
         // Add new
-        const target = this.for;
+        const target = this.scrollElement;
         target.addEventListener('scroll', this.handleScrollBinded);
         // Add cleanup
         this.cleanupTasks.push(() => {
@@ -104,12 +102,12 @@
     }
 
     getPosition () {
-      if (!this.for) return [0];
+      if (!this.scrollElement) return [0];
       // Set margin at which element considered to be focused & 'visible'
-      const margin = parseFloat(this.getAttribute('margin') || 0.05) * this.for.offsetHeight;
+      const margin = parseFloat(this.getAttribute('margin') || 0.05) * this.scrollElement.offsetHeight;
       // Get current focused & 'visible' element's position inside DOM tree
       const position = [];
-      let container = this.for;
+      let container = this.scrollElement;
       while (container && container.children.length) {
         let i = this.getVisibleElementIndex(container, margin);
         if (i < 0) {
@@ -124,7 +122,7 @@
       }
       // Add relative top margin of the target element
       const rect = container.getBoundingClientRect();
-      position.push(rect.top / rect.height);
+      position.push(rect.height ? (rect.top / rect.height) : 0);
       // Element's position in DOM is an array of indexes,
       // and last item in array is always it's top margin relative to viewport:
       // [1, 2, -1.456788]
@@ -132,9 +130,9 @@
     }
 
     setPosition (position) {
-      this.for.activateChild(position[0]);
+      this.scrollElement.activateChild(position[0]);
       let i = 0;
-      let target = this.for;
+      let target = this.scrollElement;
       while (i < position.length && i < this.maxDepth) {
         if (target.children && target.children[position[i]]) {
           target = target.children[position[i]]
@@ -148,7 +146,7 @@
       // Scroll more to match shift
       if (i < position.length) {
         const y = Math.round(-1 * position[i] * target.offsetHeight);
-        this.for.scrollBy(0, y);
+        this.scrollElement.scrollBy(0, y);
       }
     }
 

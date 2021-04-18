@@ -23,7 +23,7 @@ describe('book-scroll-position', () => {
       d.close();
     });
     cy.get('book-scroll-position').then($el => {
-      expect($el.get(0).for).to.equal($el.get(0).getRootNode().getElementById('id1'));
+      expect($el.get(0).scrollElement).to.equal($el.get(0).getRootNode().getElementById('id1'));
     });
   });
 
