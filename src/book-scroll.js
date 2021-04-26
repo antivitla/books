@@ -19,10 +19,6 @@
 
   class HTMLBookScrollElement extends HTMLElement {
 
-    DEFAULT = {
-      activationMargin: '2000px 0px'
-    };
-
     constructor () {
       super();
       this.attachShadow({mode: 'open'});
@@ -39,6 +35,10 @@
         <div class="book-scroll-sentinel bottom"></div>
       `;
     }
+
+    DEFAULT = {
+      activationMargin: '2000px 0px'
+    };
 
     static get observedAttributes () {
       return ['activation-margin'];
@@ -324,7 +324,11 @@
       // Deactivate intersection detection
       this.ignoreIntersection = true;
       // Deactivate all other fragments
-      Array.from(this.children).forEach(child => child.active = false);
+      Array.from(this.children).forEach(child => {
+        this.removeEnterObserverFrom(child);
+        this.removeLeaveObserverFrom(child);
+        child.active = false;
+      });
       // Activate desired fragment
       target.active = true;
 

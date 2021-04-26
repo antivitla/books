@@ -25,6 +25,8 @@
 
     cleanupTasks = [];
     complete = false;
+    DEFAULT_DEPTH = 2;
+    DEFAULT_MARGIN = 0.05;
 
     static get observedAttributes () {
       return ['for'];
@@ -36,8 +38,12 @@
       }
     }
 
-    get maxDepth () {
-      return parseInt(this.getAttribute('max-depth'), 10) || 2;
+    get depth () {
+      return parseInt(this.getAttribute('depth'), 10) || this.DEFAULT_DEPTH;
+    }
+
+    get margin () {
+      return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN);
     }
 
     get position () {
@@ -104,25 +110,26 @@
     getPosition () {
       if (!this.scrollElement) return [0];
       // Set margin at which element considered to be focused & 'visible'
-      const margin = parseFloat(this.getAttribute('margin') || 0.05) * this.scrollElement.offsetHeight;
+      const margin = this.margin * this.scrollElement.offsetHeight;
+      const contextRect = this.scrollElement.getBoundingClientRect();
       // Get current focused & 'visible' element's position inside DOM tree
       const position = [];
       let container = this.scrollElement;
       while (container && container.children.length) {
-        let i = this.getVisibleElementIndex(container, margin);
+        let i = this.getVisibleElementIndex(container, margin, contextRect);
         if (i < 0) {
           break;
         }
         position.push(i);
         container = container.children[i];
-        // Exit at max depth === 2
-        if (position.length >= this.maxDepth) {
+        // Exit at defined depth (2 by default)
+        if (position.length >= this.depth) {
           break;
         }
       }
       // Add relative top margin of the target element
       const rect = container.getBoundingClientRect();
-      position.push(rect.height ? (rect.top / rect.height) : 0);
+      position.push(rect.height ? ((rect.top - contextRect.top) / rect.height) : 0);
       // Element's position in DOM is an array of indexes,
       // and last item in array is always it's top margin relative to viewport:
       // [1, 2, -1.456788]
@@ -133,7 +140,7 @@
       this.scrollElement.activateChild(position[0]);
       let i = 0;
       let target = this.scrollElement;
-      while (i < position.length && i < this.maxDepth) {
+      while (i < position.length && i < this.depth) {
         if (target.children && target.children[position[i]]) {
           target = target.children[position[i]]
           i += 1;
@@ -150,11 +157,18 @@
       }
     }
 
-    getVisibleElementIndex(container, margin) {
+    getVisibleElementIndex(container, margin, contextRect) {
       const children = Array.from(container.children);
       const visibleChildren = children.filter(child => child.getClientRects().length);
       const index = BinarySearch(visibleChildren, null, (child, value, index) => {
-        const rect = child.getBoundingClientRect();
+        const childRect = child.getBoundingClientRect();
+        const rect = {};
+        if (contextRect) {
+          rect.top = childRect.top - contextRect.top;
+          rect.bottom = childRect.bottom - contextRect.top;
+        } else {
+          rect = childRect;
+        }
         // If first element and is lower (than viewport border),
         // or last element and is higher,
         // or intersecting viewport border
@@ -182,7 +196,7 @@
           return 1;
         }
       });
-      return children.indexOf(visibleChildren[index]);
+      return children.indexOf(visibleChildren[index < 0 ? Math.abs(index) - 1 : index]);
     }
   }
 
