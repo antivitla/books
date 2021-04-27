@@ -23,6 +23,13 @@
       border-bottom: 0;
       font-size: 18px;
       overflow: hidden;
+      /* display: flex; */
+      /* flex-direction: column; */
+    }
+    .part > div {
+      flex-grow: 1;
+      height: 20%;
+      outline: solid crimson 1px;
     }
     .part:last-child {
       border-bottom: solid 5px;
@@ -40,22 +47,22 @@
     .color-7 { background-color: coral; }
     .color-8 { background-color: darkkhaki; }
     .color-9 { background-color: darksalmon; }
-  </style>
-  <style>
-    book-scroll-control {
+    .margin {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 25px;
-      background-color: ghostwhite;
-      border: solid black 3px;
-      border-radius: 3px;
+      top: 5vh;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background-color: blue;
     }
   </style>
 </head>
 <body>
+<div class="margin"></div>
 <book-scroll-control for="book-scroll" type="url"></book-scroll-control>
-<book-scroll-position for="book-scroll" margin="0.05"></book-scroll-position>
+<book-scroll-control for="book-scroll" type="scrollbar"></book-scroll-control>
+
+<book-scroll-position for="book-scroll" margin="0.05" depth="2"></book-scroll-position>
 <book-scroll id="book-scroll"></book-scroll>
 <script>
   (function () {
@@ -106,20 +113,31 @@
     bookScroll.append(fragment);
 
     // Fill with random text
-    fetch('https://fish-text.ru/get?type=paragraph&number=40')
+    fetch('https://fish-text.ru/get?type=sentence&number=40')
       .then(response => response.json())
       .then(json => json.text)
       .then(text => {
-        const lines = text.split('\\n\\n');
-        const parts = Array.from(bookScroll.querySelectorAll('.part'));
+        const lines = text.split('. ');
+        const parts = Array.from(bookScroll.querySelectorAll('.part:not(.measure)'));
         parts.forEach((part, index) => {
-          part.innerHTML = lines[index].split(' ').map(word => {
-            return `<p>${word}</p>`
+          const size = Math.round(3 + Math.random()*3);
+          const html = lines[index].split(' ').slice(0,size).map(word => {
+            return `<div style="height: ${100 / size}%">${word}</div>`
           }).join(' ');
+          if (part.active) {
+            part.innerHTML = html;
+          } else {
+            part.children[0].innerHTML = html;
+          }
         });
       })
       .finally(() => {
-        document.querySelector('book-scroll-position').emitPositionChange();
+        setTimeout(() => {
+          const scrollbar = document.querySelector('book-scroll-control[type="scrollbar"]');
+          scrollbar.calculateScrollTrackModel();
+          scrollbar.calculateScrollThumbSizePoints();
+          document.querySelector('book-scroll-position').emitPositionChange();
+        }, 500);
       });
   }());
 </script>
