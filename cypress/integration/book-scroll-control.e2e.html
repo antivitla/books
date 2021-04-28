@@ -134,8 +134,7 @@
       .finally(() => {
         setTimeout(() => {
           const scrollbar = document.querySelector('book-scroll-control[type="scrollbar"]');
-          scrollbar.calculateScrollTrackModel();
-          scrollbar.calculateScrollThumbSizePoints();
+          scrollbar.clearScrollbarCache();
           document.querySelector('book-scroll-position').emitPositionChange();
         }, 500);
       });
