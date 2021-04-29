@@ -149,11 +149,11 @@
         }
       }
       // Scroll to target
-      target.scrollIntoView(true);
+      // target.scrollIntoView(true);
+      this.scrollElement.scrollTop = target.offsetTop;
       // Scroll more to match shift
       if (i < position.length) {
-        const y = Math.round(-1 * position[i] * target.offsetHeight);
-        this.scrollElement.scrollBy(0, y);
+        this.scrollElement.scrollTop += Math.round(-1 * position[i] * target.offsetHeight);
       }
     }
 

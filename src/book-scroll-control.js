@@ -51,7 +51,7 @@
             position: absolute;
             width: 100%;
             box-sizing: border-box;
-            min-height: var(--book-scrollbar-thumb-min-height, 20px);
+            min-height: var(--book-scrollbar-thumb-min-height, 50px);
             top: 0%;
             right: 0px;
             border: solid #e6e6e6 4px;
@@ -78,6 +78,7 @@
       this.handleChangeBinded = this.handleChange.bind(this);
       this.handleKeyBinded = this.handleKey.bind(this);
       this.handleResizeBinded = this.handleResize.bind(this);
+      this.handleMouseThumbBinded = this.handleMouseThumb.bind(this);
     }
 
     cleanupTasks = [];
@@ -144,20 +145,34 @@
       history.replaceState({position: position.slice(0)}, null, url.href);
     }
 
+    get positionInScrollbar () {
+      let positionRelative = this.scrollbarThumbPositionPx / this.scrollbarTrackSizePx;
+      let positionPoints = positionRelative * this.scrollbarTotalPoints;
+      let positionShift = positionPoints % 1;
+      let fragment = 0;
+      while (this.scrollbarTrackModel[fragment] < positionPoints) {
+        fragment += 1;
+      }
+      let position = [
+        fragment ? fragment - 1 : 0,
+        Math.floor(positionPoints) - this.scrollbarTrackModel[fragment ? fragment - 1 : 0],
+        -1 * positionShift
+      ];
+      return position;
+    }
+
     set positionInScrollbar (position) {
 
       // Set thumb size
       const thumbMinPx = this.scrollbarThumbMinHeightPx;
       const thumbSizePx = this.scrollbarThumbPoints * this.scrollbarPointSizePx;
-      this.scrollbarThumbElement.style.height = `${Math.max(thumbMinPx, thumbSizePx)}px`;
+      this.setScrollbarThumbElementSizePx(Math.max(thumbMinPx, thumbSizePx));
 
       // Set thumb position
-      const totalPoints = this.scrollbarTotalPoints;
       const positionPoint = this.scrollbarTrackModel[position[0]] + position[1];
-      const trackSizePx = this.scrollbarTrackSizePx - (
-        thumbSizePx < thumbMinPx ? thumbMinPx - thumbSizePx : 0
-      );
-      this.scrollbarThumbElement.style.top = `${trackSizePx * positionPoint / totalPoints}px`;
+      const totalPoints = this.scrollbarTotalPoints;
+      const trackSizePx = this.scrollbarTrackSizePx;
+      this.setScrollbarThumbElementPositionPx(trackSizePx * positionPoint / totalPoints);
     }
 
     get initScrollbarComplete () {
@@ -165,20 +180,37 @@
     }
 
     // Scrollbar data
-    get scrollbarThumbPoints () {
-      if (!this.__scrollbarThumbPoints) {
-        this.__scrollbarThumbPoints = this.calculateScrollThumbSizePoints();
-      }
-      return this.__scrollbarThumbPoints;
-    }
     get scrollbarTrackModel () {
       if (!this.__scrollbarTrackModel) {
         this.__scrollbarTrackModel = this.calculateScrollTrackModel();
       }
       return this.__scrollbarTrackModel;
     }
+    get scrollbarThumbPoints () {
+      if (!this.__scrollbarThumbPoints) {
+        this.__scrollbarThumbPoints = this.calculateScrollThumbSizePoints();
+      }
+      return this.__scrollbarThumbPoints;
+    }
     get scrollbarTotalPoints () {
       return this.scrollbarTrackModel[this.scrollbarTrackModel.length - 1];
+    }
+    get scrollbarTrackFullSizePx () {
+      if (!this.__scrollbarTrackFullSizePx) {
+        this.__scrollbarTrackFullSizePx = this.scrollbarTrackElement.getBoundingClientRect().height;
+      }
+      return this.__scrollbarTrackFullSizePx;
+    }
+    get scrollbarTrackSizePx () {
+      if (!this.__scrollbarTrackSizePx) {
+        const thumbSizePx = this.scrollbarThumbPoints * this.scrollbarPointSizePx;
+        this.__scrollbarTrackSizePx = this.scrollbarTrackFullSizePx - (
+          thumbSizePx < this.scrollbarThumbMinHeightPx
+            ? this.scrollbarThumbMinHeightPx - thumbSizePx
+            : 0
+        );
+      }
+      return this.__scrollbarTrackSizePx;
     }
     get scrollbarThumbMinHeightPx () {
       if (!this.__scrollbarThumbMinHeightPx) {
@@ -188,31 +220,58 @@
       }
       return this.__scrollbarThumbMinHeightPx;
     }
-    get scrollbarTrackSizePx () {
-      if (!this.__scrollbarTrackSizePx) {
-        this.__scrollbarTrackSizePx = this.scrollbarTrackElement.getBoundingClientRect().height;
+    get scrollbarThumbSizePx () {
+      if (!this.__scrollbarThumbSizePx) {
+        this.__scrollbarThumbSizePx = Math.max(
+          this.scrollbarThumbMinHeightPx,
+          this.scrollbarThumbPoints * this.scrollbarPointSizePx
+        );
       }
-      return this.__scrollbarTrackSizePx;
+      return this.__scrollbarThumbSizePx;
     }
     get scrollbarPointSizePx () {
-      return this.scrollbarTrackSizePx / this.scrollbarTotalPoints;
+      return this.scrollbarTrackFullSizePx / this.scrollbarTotalPoints;
+    }
+    get scrollbarThumbPositionPx () {
+      return this.__scrollbarThumbPositionPx;
+    }
+
+    setScrollbarThumbElementSizePx (size) {
+      this.scrollbarThumbElement.style.height = `${size}px`;
+    }
+
+    setScrollbarThumbElementPositionPx (y) {
+      this.__scrollbarThumbPositionPx = y;
+      this.scrollbarThumbElement.style.top = `${y}px`;
     }
 
     clearScrollbarCache () {
-      delete this.__scrollbarThumbPoints;
       delete this.__scrollbarTrackModel;
-      delete this.__scrollbarThumbMinHeightPx;
+      delete this.__scrollbarThumbPoints;
+      // delete this.__scrollbarTotalPoints;
+      delete this.__scrollbarTrackFullSizePx;
       delete this.__scrollbarTrackSizePx;
+      delete this.__scrollbarThumbMinHeightPx;
+      delete this.__scrollbarThumbSizePx;
+      // delete this.__scrollbarPointSizePx;
+    }
+
+    get scrollDebounce () {
+      return parseInt(this.getAttribute('scroll-debounce') || 0, 10);
+    }
+
+    get scrollThreshold () {
+      return parseInt(this.getAttribute('scroll-threshold') || 0, 10);
     }
 
     attributeChangedCallback (name, oldValue, newValue) {
       if (['for', 'type'].indexOf(name) > -1 && newValue && newValue !== oldValue) {
         // Init DOM for different control types
         if (name === 'type') {
-          // remove old controls
-          for(let el of this.shadowRoot.querySelectorAll('.control')) el.remove();
-          // add new ones
-          if (['scrollbar', 'index', 'running'].indexOf(newValue) > -1) {
+          if (['scrollbar', 'toc', 'running'].indexOf(newValue) > -1) {
+            // remove old controls
+            for(let el of this.shadowRoot.querySelectorAll('.control')) el.remove();
+            // add new ones
             this.shadowRoot.append(
               this.shadowRoot.querySelector(`template[type="${newValue}"]`).content.cloneNode(true)
             );
@@ -279,13 +338,24 @@
           });
         }
 
-        // Refresh scrollbar items
-        if (this.controlType === 'scrollbar') {
+        // Init scrollbar
+        if (this.controlType === 'scrollbar' && this.scrollbarThumbElement) {
+          // Refresh on resize
           window.addEventListener('resize', this.handleResizeBinded);
           this.cleanupTasks.push(() => {
             window.removeEventListener('resize', this.handleResizeBinded);
+          });
+          // Drag thumb
+          this.scrollbarThumbElement.addEventListener('mousedown', this.handleMouseThumbBinded);
+          document.addEventListener('mouseup', this.handleMouseThumbBinded);
+          document.addEventListener('mousemove', this.handleMouseThumbBinded);
+          this.cleanupTasks.push(() => {
+            this.scrollbarThumbElement.removeEventListener('mousedown', this.handleMouseThumbBinded);
+            document.removeEventListener('mouseup', this.handleMouseThumbBinded);
+            document.removeEventListener('mousemove', this.handleMouseThumbBinded);
           })
         }
+
         // Notify success
         return true;
       }
@@ -311,21 +381,24 @@
           this.scrollTo(this.positionInUrl);
           this.initUrlComplete = true;
         }
-        
+
         // Update position controls
         this.scrollPositionElement.emitPositionChange();
       });
     }
 
     handleChange (event) {
-      // Normalize float to 3 digits after dot ('.000')
       const position = event.detail;
       // Control type 'url': apply position to url hash (when when ready)
       if (this.controlType === 'url' && this.initUrlComplete) {
         this.positionInUrl = position;
       }
       // Control type: 'scrollbar': apply position to bar track
-      else if (this.controlType === 'scrollbar' && this.initScrollbarComplete) {
+      else if (
+        this.controlType === 'scrollbar' &&
+        this.initScrollbarComplete &&
+        !this.__dragPending
+      ) {
         this.positionInScrollbar = position;
       }
     }
@@ -345,6 +418,76 @@
       this.__resizeTimeout = setTimeout(() => {
         this.clearScrollbarCache();
       }, 500);
+    }
+
+    handleMouseThumb (event) {
+      // Early exit
+      if (event.type === 'mousemove' && !this.__dragPending) {
+        return;
+      }
+
+      // Perform drag calculations
+      else if (event.type === 'mousemove' && this.__dragPending) {
+        // Move up or down depending on mouse move delta
+        let delta;
+        let top;
+        if (
+          typeof this.__dragPreviousClientY !== 'undefined' &&
+          typeof this.__dragPreviousTop !== 'undefined'
+        ) {
+          delta = event.clientY - this.__dragPreviousClientY;
+          top = this.__dragPreviousTop + delta;
+        } else {
+          const currentTop = this.scrollbarThumbElement.getBoundingClientRect().top
+          delta = event.clientY - currentTop;
+          top = currentTop + delta;
+        }
+        this.__dragPreviousClientY = event.clientY;
+
+        // Truncate 'y' position, taking thumb shift relative to mouse pointer into account
+        if (top - this.__dragShift < 0) {
+          top = this.__dragShift;
+        } else if (top - this.__dragShift  > this.scrollbarTrackFullSizePx - this.scrollbarThumbSizePx) {
+          top = this.scrollbarTrackFullSizePx - this.scrollbarThumbSizePx + this.__dragShift;
+        }
+        this.__dragPreviousTop = top; // keep mouse position (not thumb position)
+
+        // Move thumb
+        this.setScrollbarThumbElementPositionPx(top - this.__dragShift);
+
+        // Scroll book (with threshold or debounce)
+        if (this.scrollThreshold) {
+          if (!this.__dragThreshold) {
+            this.__dragThreshold = setTimeout(() => {
+              this.scrollTo(this.positionInScrollbar);
+              delete this.__dragThreshold;
+            }, this.scrollThreshold);
+          }
+        } else if (this.scrollDebounce) {
+          clearTimeout(this.__dragThreshold);
+          this.__dragThreshold = setTimeout(() => {
+            this.scrollTo(this.positionInScrollbar);
+            // this.scrollPositionElement.emitPositionChange();
+            delete this.__dragThreshold;
+          }, this.scrollDebounce);
+        }
+      }
+
+      // Start drag (potentially)
+      else if (event.type === 'mousedown') {
+        this.scrollElement.style.userSelect = 'none'; // prevent accidental text selecting
+        this.__dragPending = true;
+        this.__dragShift = event.clientY - this.scrollbarThumbElement.getBoundingClientRect().top;
+      }
+
+      // Stop drag
+      else if (event.type === 'mouseup') {
+        this.scrollElement.style.userSelect = null;
+        delete this.__dragPending;
+        delete this.__dragShift;
+        delete this.__dragPreviousClientY;
+        delete this.__dragPreviousTop;
+      }
     }
 
     calculateScrollTrackModel () {
@@ -405,10 +548,28 @@
     }
 
     scrollTo (position) {
-      // Normally position is anarray of indexes, but can be a string ('top', 'bottom', etc)
+      // Normally position is an array of indexes,
+      // but can be a string ('top', 'bottom', etc)
       if (Array.isArray(position)) {
-        // If more than fragments, scroll to bottom
+
+        // If too much fragments, scroll to bottom
         if (position[0] && position[0] >= this.scrollElement.children.length) {
+          this.scrollTo('bottom');
+          return;
+        }
+
+        // If at top, use scrollTp('top') to have precise auto-shift
+        if (position[0] === 0 && position[1] === 0 && position[2] === 0) {
+          this.scrollTo('top');
+          return;
+        }
+
+        // If at bottom, use scrollTo('bottom') to have precise auto-shift
+        const model = this.scrollbarTrackModel;
+        if (
+          position[0] === model.length - 2 &&
+          position[1] >= model[model.length - 2] - model[model.length - 3]
+        ) {
           this.scrollTo('bottom');
           return;
         }
