@@ -79,6 +79,7 @@
       this.handleKeyBinded = this.handleKey.bind(this);
       this.handleResizeBinded = this.handleResize.bind(this);
       this.handleMouseThumbBinded = this.handleMouseThumb.bind(this);
+      this.handleMouseTrackBinded = this.handleMouseTrack.bind(this);
     }
 
     cleanupTasks = [];
@@ -86,6 +87,9 @@
     initUrlComplete = false;
 
     DEFAULT_POSITION = [0];
+    DEFAULT_DEBOUNCE = 0;
+    DEFAULT_THRESHOLD = 0;
+    DEFAULT_SCROLL_FASTER = 'page';
 
     static get observedAttributes () {
       return ['for', 'type'];
@@ -146,19 +150,7 @@
     }
 
     get positionInScrollbar () {
-      let positionRelative = this.scrollbarThumbPositionPx / this.scrollbarTrackSizePx;
-      let positionPoints = positionRelative * this.scrollbarTotalPoints;
-      let positionShift = positionPoints % 1;
-      let fragment = 0;
-      while (this.scrollbarTrackModel[fragment] < positionPoints) {
-        fragment += 1;
-      }
-      let position = [
-        fragment ? fragment - 1 : 0,
-        Math.floor(positionPoints) - this.scrollbarTrackModel[fragment ? fragment - 1 : 0],
-        -1 * positionShift
-      ];
-      return position;
+      return this.calculatePositionInScrollbar(this.scrollbarThumbPositionPx)
     }
 
     set positionInScrollbar (position) {
@@ -235,11 +227,16 @@
     get scrollbarThumbPositionPx () {
       return this.__scrollbarThumbPositionPx;
     }
+    get scrollbarTrackElementRect () {
+      if (!this.__scrollbarTrackElementRect) {
+        this.__scrollbarTrackElementRect = this.scrollbarTrackElement.getBoundingClientRect();
+      }
+      return this.__scrollbarTrackElementRect;
+    }
 
     setScrollbarThumbElementSizePx (size) {
       this.scrollbarThumbElement.style.height = `${size}px`;
     }
-
     setScrollbarThumbElementPositionPx (y) {
       this.__scrollbarThumbPositionPx = y;
       this.scrollbarThumbElement.style.top = `${y}px`;
@@ -254,14 +251,19 @@
       delete this.__scrollbarThumbMinHeightPx;
       delete this.__scrollbarThumbSizePx;
       // delete this.__scrollbarPointSizePx;
+      delete this.__scrollbarTrackElementRect;
     }
 
     get scrollDebounce () {
-      return parseInt(this.getAttribute('scroll-debounce') || 0, 10);
+      return parseInt(this.getAttribute('scroll-debounce') || this.DEFAULT_DEBOUNCE, 10);
     }
 
     get scrollThreshold () {
-      return parseInt(this.getAttribute('scroll-threshold') || 0, 10);
+      return parseInt(this.getAttribute('scroll-threshold') || this.DEFAULT_THRESHOLD, 10);
+    }
+
+    get scrollFaster () {
+      return this.getAttribute('scroll-faster') || this.DEFAULT_SCROLL_FASTER;
     }
 
     attributeChangedCallback (name, oldValue, newValue) {
@@ -353,7 +355,12 @@
             this.scrollbarThumbElement.removeEventListener('mousedown', this.handleMouseThumbBinded);
             document.removeEventListener('mouseup', this.handleMouseThumbBinded);
             document.removeEventListener('mousemove', this.handleMouseThumbBinded);
-          })
+          });
+          // Track click
+          this.scrollbarTrackElement.addEventListener('click', this.handleMouseTrackBinded);
+          this.cleanupTasks.push(() => {
+            this.scrollbarTrackElement.removeEventListener('click', this.handleMouseTrackBinded);
+          });
         }
 
         // Notify success
@@ -404,12 +411,10 @@
     }
 
     handleKey (event) {
-      if (event.code.match(/home/i)) {
-        this.scrollTo('top');
-      }
-
-      else if (event.code.match(/end/i)) {
-        this.scrollTo('bottom');
+      if (event.code.match(/home|end|pageup|pagedown/i)) {
+        this.scrollTo(event.code.toLowerCase());
+        event.preventDefault();
+        event.stopPropagation();
       }
     }
 
@@ -418,6 +423,20 @@
       this.__resizeTimeout = setTimeout(() => {
         this.clearScrollbarCache();
       }, 500);
+    }
+
+    handleMouseTrack (event) {
+      // If clicked on scrollbar track, scroll page down/up,
+      // depending on click position relative to thumb
+      if (event.target === this.scrollbarTrackElement) {
+        if (this.scrollFaster === 'position') {
+          const offsetY = event.clientY - this.scrollbarTrackElement.getBoundingClientRect().top;
+          this.scrollTo(this.calculatePositionInScrollbar(offsetY));
+        } else {
+          const offsetDelta = event.clientY - this.scrollbarThumbElement.getBoundingClientRect().top;
+          this.scrollTo(offsetDelta > 0 ? 'pagedown' : 'pageup');
+        }
+      }
     }
 
     handleMouseThumb (event) {
@@ -445,15 +464,16 @@
         this.__dragPreviousClientY = event.clientY;
 
         // Truncate 'y' position, taking thumb shift relative to mouse pointer into account
-        if (top - this.__dragShift < 0) {
-          top = this.__dragShift;
-        } else if (top - this.__dragShift  > this.scrollbarTrackFullSizePx - this.scrollbarThumbSizePx) {
-          top = this.scrollbarTrackFullSizePx - this.scrollbarThumbSizePx + this.__dragShift;
+        let correction = this.__dragShift + this.scrollbarTrackElementRect.top;
+        if (top - correction < 0) {
+          top = correction;
+        } else if (top - correction  > this.scrollbarTrackFullSizePx - this.scrollbarThumbSizePx) {
+          top = this.scrollbarTrackFullSizePx - this.scrollbarThumbSizePx + correction;
         }
         this.__dragPreviousTop = top; // keep mouse position (not thumb position)
 
         // Move thumb
-        this.setScrollbarThumbElementPositionPx(top - this.__dragShift);
+        this.setScrollbarThumbElementPositionPx(top - correction);
 
         // Scroll book (with threshold or debounce)
         if (this.scrollThreshold) {
@@ -467,7 +487,6 @@
           clearTimeout(this.__dragThreshold);
           this.__dragThreshold = setTimeout(() => {
             this.scrollTo(this.positionInScrollbar);
-            // this.scrollPositionElement.emitPositionChange();
             delete this.__dragThreshold;
           }, this.scrollDebounce);
         }
@@ -547,6 +566,25 @@
       return accumulatedCount;
     }
 
+    calculatePositionInScrollbar (px) {
+      if (typeof px === 'undefined') {
+        px = this.scrollbarThumbPositionPx;
+      }
+      let positionRelative = px / this.scrollbarTrackSizePx;
+      let positionPoints = positionRelative * this.scrollbarTotalPoints;
+      let positionShift = positionPoints % 1;
+      let fragment = 0;
+      while (this.scrollbarTrackModel[fragment] < positionPoints) {
+        fragment += 1;
+      }
+      let position = [
+        fragment ? fragment - 1 : 0,
+        Math.floor(positionPoints) - this.scrollbarTrackModel[fragment ? fragment - 1 : 0],
+        -1 * positionShift
+      ];
+      return position;
+    }
+
     scrollTo (position) {
       // Normally position is an array of indexes,
       // but can be a string ('top', 'bottom', etc)
@@ -554,13 +592,13 @@
 
         // If too much fragments, scroll to bottom
         if (position[0] && position[0] >= this.scrollElement.children.length) {
-          this.scrollTo('bottom');
+          this.scrollTo('end');
           return;
         }
 
         // If at top, use scrollTp('top') to have precise auto-shift
         if (position[0] === 0 && position[1] === 0 && position[2] === 0) {
-          this.scrollTo('top');
+          this.scrollTo('home');
           return;
         }
 
@@ -570,7 +608,7 @@
           position[0] === model.length - 2 &&
           position[1] >= model[model.length - 2] - model[model.length - 3]
         ) {
-          this.scrollTo('bottom');
+          this.scrollTo('end');
           return;
         }
 
@@ -587,18 +625,28 @@
       }
 
       // Scroll to top
-      else if (position === 'top') {
+      else if (position === 'home') {
         this.scrollPositionElement.position = [0];
       }
 
       // Scroll to bottom
-      else if (position === 'bottom') {
+      else if (position === 'end') {
         const lastFragmentIndex = this.scrollElement.children.length - 1;
         const lastFragment = this.scrollElement.lastElementChild;
         const lastElementIndex = lastFragment.active
           ? lastFragment.children.length - 1
           : lastFragment.children[0].content.children.length - 1;
         this.scrollPositionElement.position = [lastFragmentIndex, lastElementIndex, -1]
+      }
+
+      // Scroll page up
+      else if (position === 'pageup') {
+        this.scrollElement.scrollBy(0, -0.9 * this.scrollElement.offsetHeight);
+      }
+
+      // Scroll page down
+      else if (position === 'pagedown') {
+        this.scrollElement.scrollBy(0, 0.9 * this.scrollElement.offsetHeight);
       }
 
       // Bad position warn
