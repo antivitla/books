@@ -527,7 +527,7 @@
           this.listen('mousedown', this.scrollbarThumbElement, this.handleMouseThumbBinded);
           this.listen('mouseup', document, this.handleMouseThumbBinded);
           this.listen('mousemove', document, this.handleMouseThumbBinded);
-          this.listen('click', this.scrollbarTrackElement, his.handleMouseTrackBinded);
+          this.listen('click', this.scrollbarTrackElement, this.handleMouseTrackBinded);
         }
 
         // Type: index
