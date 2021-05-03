@@ -25,12 +25,11 @@
 
     cleanupTasks = [];
     complete = false;
+    emitPositionTimeout = 100;
     DEFAULT_DEPTH = 2;
     DEFAULT_MARGIN = 0.05;
 
-    static get observedAttributes () {
-      return ['for'];
-    }
+    // DOM references
 
     get scrollElement () {
       if (this.getAttribute('for')) {
@@ -38,8 +37,11 @@
       }
     }
 
+
+    // Public properties
+
     get depth () {
-      return parseInt(this.getAttribute('depth'), 10) || this.DEFAULT_DEPTH;
+      return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10);
     }
 
     get margin () {
@@ -52,6 +54,13 @@
 
     set position (position) {
       this.setPosition(position);
+    }
+
+
+    // Lifecycle callbacks
+
+    static get observedAttributes () {
+      return ['for'];
     }
 
     attributeChangedCallback (name, oldValue, newValue) {
@@ -68,35 +77,41 @@
     }
 
     disconnectedCallback () {
-      while (this.cleanupTasks.length) this.cleanupTasks.pop()();
+      this.cleanup();
     }
 
     init () {
       if (this.scrollElement) {
-        // Cleanup old
-        while (this.cleanupTasks.length) this.cleanupTasks.pop()();
-        // Add new
-        const target = this.scrollElement;
-        target.addEventListener('scroll', this.handleScrollBinded);
-        // Add cleanup
-        this.cleanupTasks.push(() => {
-          target.removeEventListener('scroll', this.handleScrollBinded)
-        });
-        // Notify success
+        this.cleanup();
+        this.listen('scroll', this.scrollElement, this.handleScrollBinded);
         return true;
       }
     }
+
+    cleanup () {
+      while (this.cleanupTasks.length) this.cleanupTasks.pop()();
+    }
+
+    listen(event, element, callback) {
+      element.addEventListener(event, callback);
+      this.cleanupTasks.push(() => {
+        element.removeEventListener(event, callback);
+      });
+    }
+
+
+    // Events
 
     handleScroll (event) {
       const delta = event.target.scrollTop - (this.previousScrollTop || 0);
       this.previousScrollTop = event.target.scrollTop;
       // Threshold emit
-      if (!this.emitPositionChangeThreshold) {
+      if (!this.__emitPositionTimeoutId) {
         this.emitPositionChange();
-        this.emitPositionChangeThreshold = setTimeout(() => {
+        this.__emitPositionTimeoutId = setTimeout(() => {
           this.emitPositionChange();
-          delete this.emitPositionChangeThreshold;
-        }, 100);
+          delete this.__emitPositionTimeoutId;
+        }, this.emitPositionTimeout);
       }
     }
 
@@ -106,6 +121,9 @@
         detail: this.position
       }));
     }
+
+
+    // Expensive calculations
 
     getPosition () {
       if (!this.scrollElement) return [0];
@@ -138,8 +156,10 @@
 
     setPosition (position) {
       this.scrollElement.activateChild(position[0]);
+      // Get target element
       let i = 0;
       let target = this.scrollElement;
+      if (position.length === 1) position.push(0);
       while (i < position.length && i < this.depth) {
         if (target.children && target.children[position[i]]) {
           target = target.children[position[i]]
@@ -148,13 +168,12 @@
           break;
         }
       }
-      // Scroll to target
+      // Scroll to target element
       // target.scrollIntoView(true);
       this.scrollElement.scrollTop = target.offsetTop;
-      // Scroll more to match shift
-      if (i < position.length) {
-        this.scrollElement.scrollTop += Math.round(-1 * position[i] * target.offsetHeight);
-      }
+      // Scroll more to match margin
+      const margin = i < position.length ? position[i] : this.margin;
+      this.scrollElement.scrollTop += Math.round(-1 * margin * target.offsetHeight);
     }
 
     getVisibleElementIndex(container, margin, contextRect) {

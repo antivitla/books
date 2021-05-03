@@ -1,12 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url("https://use.typekit.net/nml1xlk.css");
 
+html {
+  --book-background-light: whitesmoke;
+  --book-header-highlight-color: #B35E54;
+
+}
+
 html, body {
   font-size: 16px;
   line-height: 1.75;
-  background-color: whitesmoke;
   margin: 0;
   padding: 0;
+  background-color: var(--book-background-light, whitesmoke);
 }
 
 @media (min-width: 768px) {
@@ -272,7 +278,6 @@ html, body {
 }
 
 .book .annotation {
-  /* text-align: right; */
   padding-right: 3rem;
   font-style: italic;
   font-size: calc(1rem * 0.875);

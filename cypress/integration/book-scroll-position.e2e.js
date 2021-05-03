@@ -30,7 +30,8 @@ describe('book-scroll-position', () => {
   it('for simple use-case return first depth children position', () => {
     cy.visit(page({size: 300, count: 10}));
     cy.get('book-scroll-position').then($el => {
-      $el.get(0).position = [4]
+      $el.get(0).position = [4];
+      console.log($el.get(0).position);
       expect($el.get(0).position[0]).to.equal(4);
     });
     cy.get('book-scroll').then($el => {
@@ -38,7 +39,7 @@ describe('book-scroll-position', () => {
     });
 
     cy.get('book-scroll-position').then($el => {
-      $el.get(0).position = [0]
+      $el.get(0).position = [0];
       expect($el.get(0).position[0]).to.equal(0);
     });
     cy.get('book-scroll').then($el => {
@@ -46,7 +47,7 @@ describe('book-scroll-position', () => {
     });
 
     cy.get('book-scroll-position').then($el => {
-      $el.get(0).position = [6]
+      $el.get(0).position = [6];
       expect($el.get(0).position[0]).to.equal(6);
     });
     cy.get('book-scroll').then($el => {
