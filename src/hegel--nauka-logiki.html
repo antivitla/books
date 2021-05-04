@@ -12,154 +12,33 @@
   <script src="book-scroll.js"></script>
   <script src="book-scroll-position.js"></script>
   <script src="book-scroll-control.js"></script>
+  <script src="book-ui.js"></script>
 </head>
 <body>
 
+<!-- Book index (table of contents) -->
 <aside class="book-index">
-  <div class="book-index-toggle">
-    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-  </div>
+  <!-- <div class="book-index-toggle"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></div> -->
   <book-scroll-control for="hegel--nauka-logiki" type="index"></book-scroll-control>
-  <script>
-    (function () {
-      document.addEventListener('DOMContentLoaded', function () {
-        const bookIndex = document.querySelector('.book-index');
-        document.addEventListener('click', event => {
-          if (event.target.closest('.book-index-toggle')) {
-            bookIndex.classList.toggle('active');
-          } else if (
-            event.target.closest('.book-index book-scroll-control') ||
-            !event.target.closest('.book-index')
-          ) {
-            bookIndex.classList.remove('active');
-          }
-        });
-      });
-    }());
-  </script>
-  <style>
-    .book-index {
-      background-color: #303030;
-      color: ghostwhite;
-
-      font-family: "Old Standard TT", "Times New Roman", serif;
-      font-size: 1rem;
-      line-height: 1.5;
-
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      overflow: auto;
-      width: 100%;
-      padding: 1rem;
-      box-sizing: border-box;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease-out;
-
-      z-index: 10;
-    }
-    .book-index.active {
-      transform: translateX(0%);
-    }
-    @media (min-width: 576px) {
-      .book-index {
-        max-width: 480px;
-      }
-    }
-    .book-index .book-index-toggle {
-      width: 24px;
-      height: 24px;
-      padding: 12px;
-      display: block;
-      margin-bottom: 1rem;
-      cursor: pointer;
-      margin-top: -12px;
-      margin-left: -12px;
-    }
-    .book-index .book-index-toggle svg {
-      width: 24px;
-      height: 24px;
-      display: block;
-    }
-  </style>
 </aside>
 
+<!-- Book floating header -->
 <nav class="book-header">
-  <div class="book-index-toggle">
-    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-  </div>
+  <div class="book-index-toggle"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></div>
   <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="4"></book-scroll-control>
-  <style>
-    .book-header {
-      position: fixed;
-      left: 0px;
-      right: 0px;
-      top: 0px;
-      min-height: 3rem;
-      box-sizing: border-box;
-      padding: 1rem calc(48px + 2rem);
-      transform: translateY(-100%);
-      transition: transform 0.3s ease-out;
-      background-color: var(--book-background-light);
-      box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-
-      font-family: "Old Standard TT", "Times New Roman", serif;
-      font-weight: 300;
-      font-style: normal;
-      font-size: 1rem;
-      line-height: 1.5;
-    }
-    .book-header.active {
-      transform: translate(0%);
-    }
-    book-scroll-control {
-      max-width: 41rem;
-      margin: 0 auto;
-    }
-    .book-header .book-index-toggle {
-      width: 24px;
-      height: 24px;
-      padding: 12px;
-      display: block;
-      position: absolute;
-      left: 0.5rem;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-    }
-    .book-header .book-index-toggle svg {
-      width: 24px;
-      height: 24px;
-      display: block;
-    }
-  </style>
-  <script>
-    (function () {
-      document.addEventListener('DOMContentLoaded', function () {
-        const bookHeader = document.querySelector('.book-header');
-        const bookScroll = document.querySelector('.book-scroll');
-        let scrollTop = bookScroll.scrollTop;
-        bookScroll.addEventListener('scroll', event => {
-          let delta = bookScroll.scrollTop - scrollTop;
-          scrollTop = scrollTop + delta;
-          if (delta < 0) {
-            bookHeader.classList.add('active');
-          } else if (delta > 0){
-            bookHeader.classList.remove('active');
-          }
-        });
-        bookHeader.addEventListener('click', event => {
-          setTimeout(() => {
-            bookHeader.classList.remove('active');
-          }, 150);
-        });
-      });
-    }());
-  </script>
 </nav>
 
+<!-- Book scrollbar control -->
+<book-scroll-control for="hegel--nauka-logiki" type="scrollbar" scroll-debounce="150" scroll-faster="page"></book-scroll-control>
+
+<!-- Other book controls -->
+<book-scroll-control for="hegel--nauka-logiki" type="url"></book-scroll-control>
+<book-scroll-control for="hegel--nauka-logiki" type="keyboard"></book-scroll-control>
+
+<!-- Position handler (required for controls) -->
+<book-scroll-position for="hegel--nauka-logiki" depth="2" margin="0.2"></book-scroll-position>
+
+<!-- Book -->
 <book-scroll id="hegel--nauka-logiki" class="book-scroll">
   <book-fragment class="book" src="hegel--nauka-logiki/cover.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/k-voprosu-o-dialektike.html" src-selector="section > *"></book-fragment>
@@ -168,6 +47,7 @@
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-1--s-chego-sleduet-nachinat-nauku.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-1--otdel-1--bytie.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-1--otdel-1--nalichnoe-bytie.html" src-selector="section > *"></book-fragment>
+  <!--
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-1--otdel-1--dlya-sebya-bytie.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-1--otdel-2--velichina-kolichestvo.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-1--otdel-2--opredelennoe-kolichestvo.html" src-selector="section > *"></book-fragment>
@@ -198,12 +78,8 @@
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-3--otdel-3--ideya-poznaniya.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-3--otdel-3--absolyutnaya-ideya.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/o-logike-gegelya.html" src-selector="section > *"></book-fragment>
-  <!---->
+  -->
 </book-scroll>
-<book-scroll-position for="hegel--nauka-logiki" depth="2" margin="0.2"></book-scroll-position>
-<book-scroll-control for="hegel--nauka-logiki" type="url"></book-scroll-control>
-<book-scroll-control for="hegel--nauka-logiki" type="scrollbar" scroll-debounce="150" scroll-faster="page"></book-scroll-control>
-<book-scroll-control for="hegel--nauka-logiki" type="keyboard"></book-scroll-control>
 
 </body>
 </html>

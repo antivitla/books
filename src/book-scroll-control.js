@@ -23,6 +23,16 @@
       this.attachShadow({mode: 'open'});
       this.shadowRoot.innerHTML = `
         <style>
+          @keyframes spin {
+            from {
+              transform: rotate(0deg);
+            }
+
+            to {
+              transform: rotate(360deg);
+            }
+          }
+
           /* Url */
 
           :host([type="url"]) {
@@ -72,40 +82,52 @@
             padding-right: 20px;
           }
 
+          .running-breadcrumbs {
+            font-size: small;
+            text-align: center;
+            margin-bottom: 0.5rem;
+          }
+
+          .running-breadcrumbs:empty {
+            display: none;
+          }
+
+          .running-breadcrumbs header {
+            display: inline;
+            cursor: pointer;
+          }
+
+          .running-breadcrumbs header:hover {
+            text-decoration: underline;
+          }
+
+          .running-breadcrumbs header .prefix:after {
+            content: '. ';
+          }
+
+          .running-breadcrumbs .divider:after {
+            content: ' — '
+          }
+
           .running-header {
             text-align: center;
           }
 
-          .running-header[data-depth="1"],
-          .running-header[data-depth="2"],
-          .running-header[data-depth="3"],
-          .running-header[data-depth="4"] {
-            color: var(--book-header-highlight-color, #B35E54);
-          }
-
-          .running-header .running-title {
+          .running-header:empty:after {
+            content: '';
             display: block;
-            font-weight: bold;
+            width: 24px;
+            height: 24px;
+            border: solid 2px #303030;
+            border-right-color: transparent;
+            border-radius: 50%;
+            box-sizing: border-box;
+            margin: 3px auto;
+            animation: spin 0.5s linear infinite;
           }
 
-          .running-header .running-prefix,
-          .running-header .running-author {
-            display: block;
-            font-size: smaller;
-          }
-
-          .running-breadcrumbs {
-            font-size: small;
-            margin-bottom: 0.5rem;
-            text-align: center;
-          }
-
-          .running-breadcrumb {
-            cursor: pointer;
-          }
-
-          .running-breadcrumb:hover {
-            text-decoration: underline;
+          .running-header .prefix:after {
+            content: '. ';
           }
 
           /* Index */
@@ -118,10 +140,73 @@
             line-height: var(--book-index-line-height, 1.375);
           }
 
-          .index {
+          .index:empty:after {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 24px;
+            border: solid 2px #303030;
+            border-right-color: transparent;
+            border-radius: 50%;
+            box-sizing: border-box;
+            margin: 3px auto;
+            animation: spin 0.5s linear infinite;
+          }
+
+          .index ul {
             padding: 0;
             margin: 0;
           }
+
+          .index li {
+            list-style: none;
+            margin: 0.5rem 0;
+          }
+
+          .index header {
+            cursor: pointer;
+          }
+
+          .index header:hover {
+            /* text-decoration: underline; */
+            /* border-left: inset solid 2px; */
+          }
+
+          .index li header {
+            padding-left: 0.75rem;
+          }
+
+          .index li li header {
+            padding-left: 1.5rem;
+          }
+
+          .index li li li header {
+            padding-left: 2.25rem;
+          }
+
+          .index li li li li header {
+            padding-left: 3rem;
+          }
+
+          .index li li li li li header {
+            padding-left: 3.75rem;
+          }
+
+          .index li li li li li li header {
+            padding-left: 4.5rem;
+          }
+
+          .index header .author {
+            display: block;
+            font-size: 75%;
+          }
+
+          .index header .prefix {
+            display: block;
+            font-size: 75%;
+          }
+
+          /*
 
           .index-entry {
             list-style: none;
@@ -163,6 +248,8 @@
           .index-entry-author {
             font-size: 75%;
           }
+
+          */
         </style>
         <template type="scrollbar">
           <div class="control scrollbar-track">
@@ -170,7 +257,7 @@
           </div>
         </template>
         <template type="index">
-          <ul class="control index"></ul>
+          <div class="control index"></div>
         </template>
         <template type="running">
           <div class="control running">
@@ -344,13 +431,27 @@
         if (!this.__indexModel) {
           this.__indexModelPromise = this.calculateIndexModel().then(model => {
             this.__indexModel = model;
-            return model;
+            return this.__indexModel;
           });
         } else {
           this.__indexModelPromise = new Promise(resolve => resolve(this.__indexModel));
         }
       }
       return this.__indexModelPromise;
+    }
+
+    get indexModelTreePromise () {
+      if (!this.__indexModelTreePromise) {
+        if (!this.__indexModelTree) {
+          this.__indexModelTreePromise = this.indexModelPromise.then(model => {
+            this.__indexModelTree = this.calculateIndexModelTree(model);
+            return this.__indexModelTree;
+          });
+        } else {
+          this.__indexModelTreePromise = new Promise(resolve => resolve(this.__indexModelTree));
+        }
+      }
+      return this.__indexModelTreePromise;
     }
 
 
@@ -570,9 +671,11 @@
 
       // Type: index
       else if (this.controlType === 'index') {
-        this.calculateIndexModel().then(model => {
-          this.__indexModel = model;
-          this.renderIndex(model, this.indexElement);
+        this.indexModelPromise.then(model => {
+          // this.renderIndex(model, this.indexElement);
+        });
+        this.indexModelTreePromise.then(tree => {
+          this.renderIndexTree(tree, this.indexElement);
         });
       }
 
@@ -906,16 +1009,46 @@
           });
         }
         fragmentPosition += 1;
-        this.dispatchEvent(new CustomEvent('book-scroll-control:index-loading-progress', {
-          bubbles: true,
-          detail: {
-            current: fragmentPosition,
-            total: fragmentsTotal
-          }
-        }));
-        console.log('index done:', `${fragmentPosition}/${this.scrollElement.children.length}`);
+        // this.dispatchEvent(new CustomEvent('book-scroll-control:index-loading-progress', {
+        //   bubbles: true,
+        //   detail: {
+        //     current: fragmentPosition,
+        //     total: fragmentsTotal
+        //   }
+        // }));
       }
       return headers;
+    }
+
+    calculateIndexModelTree (model) {
+      const tree = {root: true, children: []};
+      let branch = tree;
+      function prev () {
+        return branch.children[branch.children.length - 1];
+      }
+      model.forEach((header, index) => {
+        let prev = branch.children[branch.children.length - 1];
+        // Rules:
+        // Next header is either:
+        // - same depth
+        // - next depth (always +1, not more)
+        // - lower depth, parent. This one should find nearest same depth in ancestors
+        if (index === 0 || header.depth === prev.depth) {
+          branch.children.push(header);
+          header.parent = branch;
+        } else if (header.depth > prev.depth) {
+          prev.children = [header];
+          header.parent = prev;
+          branch = prev;
+        } else if (header.depth < prev.depth) {
+          // let parent = header.parent;
+          while (header.depth <= branch.depth && branch.parent) branch = branch.parent;
+          branch.children.push(header);
+          header.parent = branch;
+        }
+      });
+      return tree;
+      console.log(tree);
     }
 
 
@@ -957,41 +1090,51 @@
     renderIndex (model, element) {
       const indexElement = document.createDocumentFragment();
       const template = document.createElement('template');
-      for (let header of model) {
-        template.innerHTML = `
-          <li class="index-entry" data-depth="${header.depth}" data-position="${header.position.join(',')}">
-            ${header.author ? '<div class="index-entry-author">' + header.author + '</div>' : ''}
-            ${header.prefix ? '<div class="index-entry-prefix">' + header.prefix + '</div>' : ''}
-            ${header.title ? '<div class="index-entry-title">' + header.title + '</div>' : ''}
-          </li>
-        `;
+      model.forEach(header => {
+        template.innerHTML = this.branchHTML(header);
         indexElement.append(template.content);
-      }
+      });
       element.replaceChildren(indexElement);
+    }
+
+    renderIndexTree (tree, element) {
+      const template = document.createElement('template');
+      template.innerHTML = `<ul>${
+        tree.children.map(branch => this.branchHTML(branch)).join('')
+      }</ul>`;
+      element.replaceChildren(template.content);
     }
 
     renderHeader (header, element) {
       const template = document.createElement('template');
-      template.innerHTML = `
-        ${header.author ? '<span class="running-author">' + header.author + '. </span>' : ''}
-        ${header.prefix ? '<span class="running-prefix">' + header.prefix + '. </span>' : ''}
-        ${header.title ? '<span class="running-title">' + header.title + '</span>' : ''}
-      `;
-      element.setAttribute('data-depth', header.depth);
+      template.innerHTML = this.headerHTML(header);
       element.replaceChildren(template.content);
     }
 
     renderBreadcrumbs (breadcrumbs, element) {
       const template = document.createElement('template');
-      template.innerHTML = breadcrumbs.map(header => {
-        return `<span class="running-breadcrumb" data-position="${header.position.join(',')}">
-          ${header.author ? '<span class="running-breadcrumb-author">' + header.author + '. </span>' : ''}
-          ${header.prefix ? '<span class="running-breadcrumb-prefix">' + header.prefix + '. </span>' : ''}
-          ${header.title ? '<span class="running-breadcrumb-title">' + header.title + '</span>' : ''}
-          </span>
-        `;
-      }).join(' &rarr; ');
+      template.innerHTML = breadcrumbs
+        .map(header => this.headerHTML(header))
+        .join('<span class="divider"></span>');
       element.replaceChildren(template.content);
+    }
+
+    branchHTML (branch) {
+      if (!branch.children || !branch.children.length) {
+        return `<li>${this.headerHTML(branch)}</li>`;
+      } else {
+        return `<li>${this.headerHTML(branch)}<ul>${
+          branch.children.map(child => this.branchHTML(child)).join('')
+        }</ul></li>`;
+      }
+    }
+
+    headerHTML (header) {
+      return `<header data-position="${header.position.join(',')} data-depth="${header.depth}">${
+        ['author', 'prefix', 'title'].map(item => {
+          return header[item] ? `<span class="${item}">${header[item]}</span>` : '';
+        }).join('')
+      }</header>`;
     }
   }
 
