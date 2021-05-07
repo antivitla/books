@@ -98,13 +98,12 @@ describe('book-fragment', () => {
 
     it('if src attribute present, is not complete initially, but complete after load event', done => {
       cy.document().then(d => {
-        d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/section-002.html></book-fragment>"', ['book-fragment.js']));
+        d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/section-002.html"></book-fragment>', ['book-fragment.js']));
         d.close();
       });
       cy.get('book-fragment').then($el => {
         expect($el.get(0).complete).to.be.false;
         $el.get(0).addEventListener('load', () => {
-          console.log('load', event);
           expect($el.get(0)).to.equal(event.target);
           expect(event.target.complete).to.be.true;
           done();

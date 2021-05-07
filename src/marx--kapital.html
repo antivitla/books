@@ -1,98 +1,48 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
-  <title>Маркс. Капитал</title>
+  <title>Капитал. Маркс</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="book.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <script src="binary-search.js"></script>
+  <script src="book-fragment.js"></script>
+  <script src="book-scroll.js"></script>
+  <script src="book-scroll-position.js"></script>
+  <script src="book-scroll-control.js"></script>
+  <script src="book-ui.js"></script>
 </head>
 <body>
 
-<!-- (1) Combine book parts -->
-<script src="h.js"></script>
-<script>
-  const book = [
-    {
-      raw: h('header', [
-        h('h1', 'Капитал'),
-        h('p.subheader', 'Критика политической экономии'),
-        h('p.author', 'Карл Маркс')
-      ])
-    },
-    {import: 'from-institute'},
-    {import: 'foreword-1'},
-    {import: 'afterword-2'},
-    {import: 'foreword-french'},
-    {import: 'afterword-french'},
-    {import: 'foreword-3'},
-    {import: 'foreword-english'},
-    {import: 'foreword-4'},
-    {
-      // Книга первая
-      section: [
-        {
-          raw: h('header', [
-            h('h2', 'Процесс производства капитала'),
-            h('p.prefix', 'Книга первая')
-          ])
-        },
-        {
-          // Отдел первый
-          section: [
-            {
-              raw: h('header', [
-                h('h3', 'Товар и деньги'),
-                h('p.prefix', 'Отдел первый')
-              ])
-            },
-            {
-              section: [
-                {import: 'glava-1--tovar'},
-                {import: 'glava-2--process-obmena'},
-                {import: 'glava-3--dengi-ili-obraschenie-tovarov'},
-              ]
-            }
-          ]
-        },
-        {
-          // Отдел второй
-          section: [
-            {
-              raw: h('header', [
-                h('h3', 'Превращение денег в капитал'),
-                h('p.prefix', 'Отдел второй')
-              ])
-            },
-            {
-              section: [
-                {import: 'glava-4--prevraschenie-deneg-v-kapital'}
-              ]
-            }
-          ]
-        },
-        {
-          // Отдел третий
-          section: [
-            {
-              raw: h('header', [
-                h('h3', 'Производство абсолютной прибавочной стоимости'),
-                h('p.prefix', 'Отдел третий'),
-              ])
-            },
-            {
-              section: [
-                {import: 'glava-5--process-truda-i-vozrastania-stoimosti'},
-                {import: 'glava-6--postoyannyi-i-peremennyi-kapital'},
-                {import: 'glava-7--norma-pribavochnoy-stoimosti'},
-                {import: 'glava-8--rabochiy-den'},
-                {import: 'glava-9--norma-i-massa-pribavochnoy-stoimosti'},
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ];
-</script>
+<!-- Book index (table of contents) -->
+<aside class="book-index">
+  <!-- <div class="book-index-toggle"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg></div> -->
+  <book-scroll-control for="marx--kapital" type="index" index-collapse-depth="2, 3"></book-scroll-control>
+</aside>
+
+<!-- Book floating header -->
+<nav class="book-header">
+  <div class="book-index-toggle">&equiv;<!--<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M3 9h14V7H3v2zm0 4h14v-2H3v2zm0 4h14v-2H3v2zm16 0h2v-2h-2v2zm0-10v2h2V7h-2zm0 6h2v-2h-2v2z"/></svg>--></div>
+  <book-scroll-control for="marx--kapital" type="running" running-depth="4"></book-scroll-control>
+</nav>
+
+<!-- Book scrollbar control -->
+<book-scroll-control for="marx--kapital" type="scrollbar" scroll-debounce="150" scroll-faster="page"></book-scroll-control>
+
+<!-- Other book controls -->
+<book-scroll-control for="marx--kapital" type="url"></book-scroll-control>
+<book-scroll-control for="marx--kapital" type="keyboard"></book-scroll-control>
+
+<!-- Position handler (required for controls) -->
+<book-scroll-position for="marx--kapital" depth="2" margin="0.2"></book-scroll-position>
+
+<!-- Book -->
+<book-scroll id="marx--kapital" class="book-scroll">
+  <book-fragment class="book" src="marx--kapital/from-institute.html" src-selector="section > *"></book-fragment>
+</book-scroll>
 
 </body>
 </html>

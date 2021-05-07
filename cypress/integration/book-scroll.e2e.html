@@ -47,16 +47,14 @@
     const urlParams = new URL(location.href).searchParams;
     const partsCount = parseInt(urlParams.get('count'), 10) || 30;
     const partSizeVh = parseInt(urlParams.get('size'), 10) || 10;
-    const activationMargin = urlParams.get('margin') || '1000px 0px';
+    const activationMargin = parseInt(urlParams.get('margin') || 1000, 10);
     const generateNext = urlParams.get('generateNext') === 'true' || false;
     const generatePrevious = urlParams.get('generatePrevious') === 'true' || false;
     const initiallyInactive = urlParams.get('inactive') || false;
 
     // Scroll root
     const bookScroll = document.querySelector('book-scroll');
-    bookScroll.setAttribute(
-      'activation-margin', activationMargin.match(/^\d+$/) ? `${activationMargin}px 0px` : activationMargin
-    );
+    bookScroll.setAttribute('activation-margin', activationMargin);
 
     // Add/remove content
     bookScroll.addEventListener('book-scroll-next', event => {

@@ -2,20 +2,25 @@
 
   // Commonjs
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = factory(require('./slug'));
+    module.exports = factory();
   }
 
   // Window
   else if (!name) {
-    console.error('No name for root export for', factory.name, factory(root.Slug).name);
+    console.error('No name for root export of', factory.name, factory().name);
   } else if (root[name]) {
-    console.warn('Root', name, 'already exported');
+    console.warn('Already exported to root', name);
   } else {
-    root[name] = factory(root.Slug);
+    root[name] = factory();
   }
 
-} (this, 'HTMLBookFragmentElement', function (Slug) {
+} (this, 'HTMLBookFragmentElement', function () {
   'use strict';
+
+  // Element can be switched 'off' from the DOM, taking no computing resources,
+  // thus increasing performance. This is done through wrapping/unwrapping element content
+  // with '<template>' tag. Switch is getter/setter 'active' property. This is
+  // what HTMLBookFragmentElement is about.
 
   class HTMLBookFragmentElement extends HTMLElement {
     constructor () {
@@ -29,72 +34,81 @@
           :host([active]) {
             display: block;
           }
-          :host([active]:not([complete])) {
-            /* pending state styles */
-          }
         </style>
         <slot></slot>
       `;
     }
 
-    complete = true;
+    // Public properties
+
+    get active () { return this.getBooleanAttribute('active'); }
+    set active (active) { this.setBooleanAttribute('active', active); }
+
+    get src () { return this.getAttribute('src'); }
+    set src (src) {
+      if (src !== this.src) {
+        this.setAttribute('src', src);
+      }
+    }
+
+    get complete () { return !this.src || !this.loading; }
+
+    // Lifecycle callbacks
 
     static get observedAttributes () {
       return ['active', 'src'];
     }
 
-    get active () {
-      return this.getBooleanAttribute('active');
-    }
-    set active (active) {
-      this.setBooleanAttribute('active', active);
-    }
-
-    attributeChangedCallback (name, previousValue, newValue) {
-      if (name === 'active' && newValue !== previousValue) {
-        if (!this.getBooleanAttribute('active') && !this.isWrapped()) {
+    attributeChangedCallback (name, previousValue, value) {
+      // Main activation/deactivation switch
+      if (name === 'active' && value !== previousValue) {
+        const isActive = this.active;
+        const isWrapped = (
+          this.children.length === 1 &&
+          this.children[0].constructor.name === 'HTMLTemplateElement'
+        );
+        if (!isActive && !isWrapped) {
           this.innerHTML = `<template>${this.innerHTML}</template>`;
-        } else if (this.getBooleanAttribute('active') && this.isWrapped()) {
+        } else if (isActive && isWrapped) {
           this.innerHTML = this.innerHTML.slice('<template>'.length, -1 * '</template>'.length);
         }
-      } else if (name === 'src' && newValue && newValue !== previousValue) {
-        this.complete = false;
-        this.setBooleanAttribute('complete', false);
-        fetch(newValue, {
+      }
+
+      // In case of remote content, fetch it
+      else if (name === 'src' && value !== previousValue) {
+        this.loading = true;
+        fetch(this.src, {
           headers: {
             'Content-Type': 'text/html'
           }
         }).then(response => response.text()).then(html => {
-          const rawHTML = html.split(/<body[^>]*>/).slice(-1)[0].split('</body>')[0];
-          const template = document.createElement('template');
-          template.innerHTML = rawHTML;
-
-          // Extract elements with selector, if provided
+          // Initially we want <body> content, if it was wrapped in it.
+          const contentHTML = html.split(/<body[^>]*>/).slice(-1)[0].split('</body>')[0];
+          const templateElement = document.createElement('template');
+          templateElement.innerHTML = contentHTML;
+          // If a 'src-selector' is set, we want more specific elements inside.
           const selector = this.getAttribute('src-selector');
           if (selector) {
-            const elements = Array.from(template.content.querySelectorAll(selector));
-            template.content.replaceChildren();
-            elements.forEach(element => template.content.append(element));
+            templateElement.content.replaceChildren(
+              ...templateElement.content.querySelectorAll(selector)
+            );
           }
-
-          if (this.active) {
-            this.replaceChildren(template.content);
-          } else {
-            this.replaceChildren(template);
-          }
+          // Now we should just insert content. If we are inactive, insert as a <template>
+          this.replaceChildren(this.active ? templateElement.content : templateElement);
         }).catch(error => {
           console.error(error);
         }).finally(() => {
-          this.complete = true;
-          this.setBooleanAttribute('complete', true);
+          this.loading = false;
           this.dispatchEvent(new CustomEvent('load', {bubbles: true}));
         });
       }
     }
 
+    // Utils
+
     getBooleanAttribute (name) {
       const attr = this.getAttribute(name);
-      return attr === 'true' || attr === '' || (attr && attr !== 'false') || attr === name;
+      return attr === 'true' || attr === '' || (attr && attr !== 'false');
     }
 
     setBooleanAttribute (name, value) {
@@ -104,13 +118,6 @@
       } else if (attr !== null && attr !== undefined && !value) {
         this.removeAttribute(name);
       }
-    }
-
-    isWrapped () {
-      return (
-        this.children.length === 1 &&
-        this.children[0].constructor.name === 'HTMLTemplateElement'
-      );
     }
   }
 

@@ -7,7 +7,7 @@
 
   // Window
   else if (!name) {
-    console.error('No name for root export', factory.name, factory(root.BinarySearch).name);
+    console.error('No name for root export of', factory.name, factory(root.BinarySearch).name);
   } else if (root[name]) {
     console.warn('Already exported to root', name);
   } else {
@@ -21,39 +21,41 @@
     constructor() {
       super();
       this.handleScrollBinded = this.handleScroll.bind(this);
+      console.log('HTMLBookScrollPositionElement constructor');
     }
 
-    cleanupTasks = [];
     complete = false;
+    cleanupTasks = [];
     emitPositionTimeout = 100;
+    waitSetupTimeout = 800;
     DEFAULT_DEPTH = 2;
     DEFAULT_MARGIN = 0.05;
-
-    // DOM references
-
-    get scrollElement () {
-      if (this.getAttribute('for')) {
-        return document.getElementById(this.getAttribute('for'));
-      }
-    }
 
 
     // Public properties
 
-    get depth () {
-      return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10);
+    get depth () { return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10); }
+
+    get margin () { return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN); }
+
+    get position () { return this.getPosition(); }
+    set position (position) { this.setPosition(position); }
+
+
+    // DOM references
+
+    get scrollElement () {
+      if (!this.__scrollElement && this.getAttribute('for')) {
+        this.__scrollElement = document.getElementById(this.getAttribute('for'));
+      }
+      return this.__scrollElement;
     }
 
-    get margin () {
-      return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN);
-    }
-
-    get position () {
-      return this.getPosition();
-    }
-
-    set position (position) {
-      this.setPosition(position);
+    get scrollElementRect () {
+      if (!this.__scrollElementRect) {
+        this.__scrollElementRect = this.scrollElement.getBoundingClientRect();
+      }
+      return this.__scrollElementRect;
     }
 
 
@@ -63,26 +65,35 @@
       return ['for'];
     }
 
-    attributeChangedCallback (name, oldValue, newValue) {
-      if (name === 'for' && newValue && newValue !== oldValue) {
-        this.complete = this.init();
+    attributeChangedCallback (name, previousValue, value) {
+      if (name === 'for' && value && value !== previousValue) {
+        this.setupCallback();
       }
     }
 
     connectedCallback () {
-      if (!this.complete) this.complete = this.init();
-      if (!this.complete) document.addEventListener('DOMContentLoaded', () => {
-        this.complete = this.init();
-      });
+      this.setupCallback();
     }
 
     disconnectedCallback () {
       this.cleanup();
     }
 
-    init () {
+    // Setup requires special elements to be present in DOM, so we wait for them.
+    setupCallback () {
+      // try to setup
+      this.complete = this.setup();
+      // if failed, wait for a better moment
+      if (!this.complete && document.readyState === 'loading') {
+        document.addEventListener('readystatechange', () => this.setupCallback(), {once: true});
+      } else if (!this.complete && document.readyState !== 'loading') {
+        setTimeout(() => this.setupCallback(), this.waitSetupTimeout);
+      }
+    }
+
+    setup () {
+      this.cleanup();
       if (this.scrollElement) {
-        this.cleanup();
         this.listen('scroll', this.scrollElement, this.handleScrollBinded);
         return true;
       }
@@ -103,9 +114,7 @@
     // Events
 
     handleScroll (event) {
-      const delta = event.target.scrollTop - (this.previousScrollTop || 0);
-      this.previousScrollTop = event.target.scrollTop;
-      // Threshold emit
+      // Emit position with threshold
       if (!this.__emitPositionTimeoutId) {
         this.emitPositionChange();
         this.__emitPositionTimeoutId = setTimeout(() => {
@@ -126,15 +135,14 @@
     // Expensive calculations
 
     getPosition () {
-      if (!this.scrollElement) return [0];
+      let d = Date.now();
       // Set margin at which element considered to be focused & 'visible'
-      const margin = this.margin * this.scrollElement.offsetHeight;
-      const contextRect = this.scrollElement.getBoundingClientRect();
+      const margin = this.margin * this.scrollElementRect.height;
       // Get current focused & 'visible' element's position inside DOM tree
       const position = [];
       let container = this.scrollElement;
       while (container && container.children.length) {
-        let i = this.getVisibleElementIndex(container, margin, contextRect);
+        let i = this.getVisibleElementIndex(container, margin, this.scrollElementRect);
         if (i < 0) {
           break;
         }
@@ -147,7 +155,7 @@
       }
       // Add relative top margin of the target element
       const rect = container.getBoundingClientRect();
-      position.push(rect.height ? ((rect.top - contextRect.top) / rect.height) : 0);
+      position.push(rect.height ? ((rect.top - this.scrollElementRect.top) / rect.height) : 0);
       // Element's position in DOM is an array of indexes,
       // and last item in array is always it's top margin relative to viewport:
       // [1, 2, -1.456788]

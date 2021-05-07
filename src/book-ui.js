@@ -1,6 +1,5 @@
 (function () {
-  function setupBookIndexPanel () {
-    const bookIndex = document.querySelector('.book-index');
+  function setupBookIndexPanel (bookIndex) {
     document.addEventListener('click', event => {
       if (event.target.closest('.book-index-toggle')) {
         bookIndex.classList.toggle('active');
@@ -13,15 +12,24 @@
     });
   }
 
-  function setupBookHeaderPanel () {
-    const bookHeader = document.querySelector('.book-header');
-    const bookScroll = document.querySelector('.book-scroll');
+  var bookHeader = {
+    activateTimeout: 300
+  };
+
+  function setupBookHeaderPanel (bookHeader, bookScroll) {
     let scrollTop = bookScroll.scrollTop;
     bookScroll.addEventListener('scroll', event => {
+      if (event.target.scrollTop < 50) {
+        bookHeader.classList.remove('active');
+        return;
+      }
       let delta = bookScroll.scrollTop - scrollTop;
       scrollTop = scrollTop + delta;
       if (delta < 0) {
-        bookHeader.classList.add('active');
+        clearTimeout(bookHeader.activateTimeoutId);
+        bookHeader.activateTimeoutId = setTimeout(() => {
+          bookHeader.classList.add('active');
+        }, bookHeader.activateTimeout)
       } else if (delta > 0){
         bookHeader.classList.remove('active');
       }
@@ -31,10 +39,21 @@
         bookHeader.classList.remove('active');
       }, 150);
     });
+    document.addEventListener('click', event => {
+      if (event.target.closest('.book-scroll')) {
+        bookHeader.classList.toggle('active');
+      } else if (!event.target.closest('.book-header')) {
+        bookHeader.classList.remove('active');
+      }
+    });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    setupBookIndexPanel();
-    setupBookHeaderPanel();
-  })
+    const bookIndex = document.querySelector('.book-index');
+    if (bookIndex) setupBookIndexPanel(bookIndex);
+
+    const bookHeader = document.querySelector('.book-header');
+    const bookScroll = document.querySelector('.book-scroll');
+    if (bookHeader && bookScroll) setupBookHeaderPanel(bookHeader, bookScroll);
+  });
 }());

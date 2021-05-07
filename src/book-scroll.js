@@ -2,19 +2,19 @@
 
   // Commonjs
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = factory(require('./binary-search'));
+    module.exports = factory();
   }
 
   // Window
   else if (!name) {
-    console.error('No name for root export for', factory.name, factory().name);
+    console.error('No name for root export of', factory.name, factory().name);
   } else if (root[name]) {
-    console.warn('Root', name, 'already exported');
+    console.warn('Already exported to root', name);
   } else {
-    root[name] = factory(/*root.BinarySearch*/);
+    root[name] = factory();
   }
 
-} (this, 'HTMLBookScrollElement', function (/*BinarySearch*/) {
+} (this, 'HTMLBookScrollElement', function () {
   'use strict';
 
   class HTMLBookScrollElement extends HTMLElement {
@@ -28,93 +28,86 @@
             display: block;
             overflow: auto;
             height: 100vh;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          :host::-webkit-scrollbar {
+            display: none;
           }
         </style>
         <div class="book-scroll-sentinel top"></div>
         <slot></slot>
         <div class="book-scroll-sentinel bottom"></div>
       `;
+      this.handleScrollIntersectionBinded = this.handleScrollIntersection.bind(this);
+      this.handleSentinelIntersectionBinded = this.handleSentinelIntersection.bind(this);
     }
 
-    DEFAULT = {
-      activationMargin: '2000px 0px'
-    };
+    cleanupTasks = [];
+    DEFAULT_ACTIVATION_MARGIN = 2000; // px
+
+    // Public properties
+
+    get activationMargin () {
+      return parseInt(this.getAttribute('activation-margin') || this.DEFAULT_ACTIVATION_MARGIN, 10);
+    }
+    set activationMargin (activationMargin) {
+      this.setAttribute('activation-margin', activationMargin);
+    }
+
+    get ignoreIntersection () {
+      return this.getBooleanAttribute('ignore-intersection');
+    }
+    set ignoreIntersection (ignoreIntersection) {
+      this.setBooleanAttribute('ignore-intersection', ignoreIntersection);
+    }
+
+    // Lifecycle callbacks
 
     static get observedAttributes () {
       return ['activation-margin'];
     }
 
-    getBooleanAttribute (name) {
-      const attr = this.getAttribute(name);
-      return attr === 'true' || attr === '' || (attr && attr !== 'false') || attr === name;
-    }
-
-    setBooleanAttribute (name, value) {
-      const attr = this.getAttribute(name);
-      if ((attr === null || attr === undefined) && value) {
-        this.setAttribute(name, '')
-      } else if (attr !== null && attr !== undefined && !value) {
-        this.removeAttribute(name);
-      }
-    }
-
-    // Is set like regular margin px: '2000px 0px'
-    get activationMargin () {
-      return this.getAttribute('activation-margin');
-    }
-    set activationMargin (margin) {
-      if (typeof margin === 'number') {
-        this.setAttribute('activation-margin', `${margin}px 0px`);
-      } else {
-        this.setAttribute('activation-margin', margin);
-      }
-    }
-
-    // Ignore intersection for predictable scroll manipulations
-    get ignoreIntersection () {
-      return this.getBooleanAttribute('ignore-intersection');
-    }
-    set ignoreIntersection (value) {
-      this.setBooleanAttribute('ignore-intersection');
-    }
-
-    connectedCallback () {
-      this.activationMargin = this.activationMargin || this.DEFAULT.activationMargin;
-      this.addEventListener('book-scroll-intersection', this.handleScrollIntersection);
-      if (!this.observeSentinel) {
-        this.initSentinelIntersectionObserver();
+    attributeChangedCallback (name, previousValue, value) {
+      if (name === 'activation-margin' && value !== previousValue) {
+        this.setup();
       }
     }
 
     disconnectedCallback () {
-      this.removeEventListener('book-scroll-intersection', this.handleScrollIntersection);
-      if (this.observeSentinel) {
-        this.observeSentinel.disconnect();
-        delete this.observeSentinel;
-      }
+      this.cleanup();
     }
 
-    attributeChangedCallback (name, oldValue, newValue) {
-      if (name === 'activation-margin' && newValue !== oldValue) {
-        this.initSentinelIntersectionObserver();
-      }
-    }
-
-    initSentinelIntersectionObserver () {
-      if (this.observeSentinel) {
-        this.observeSentinel.disconnect();
-        delete this.observeSentinel;
-      }
-      this.observeSentinel = new IntersectionObserver(this.onSentinelIntersection.bind(this), {
+    setup () {
+      this.cleanup();
+      this.listen('book-scroll-intersection', this, this.handleScrollIntersectionBinded);
+      this.observeSentinel = new IntersectionObserver(this.handleSentinelIntersectionBinded, {
         root: this,
-        rootMargin: this.activationMargin,
+        rootMargin: `${this.activationMargin}px 0px`,
         threshold: 0
       });
       this.observeSentinel.observe(this.shadowRoot.querySelector('.book-scroll-sentinel.top'));
       this.observeSentinel.observe(this.shadowRoot.querySelector('.book-scroll-sentinel.bottom'));
+      this.cleanupTasks.push(() => {
+        if (this.observeSentinel) this.observeSentinel.disconnect();
+        delete this.observeSentinel;
+      });
     }
 
-    onSentinelIntersection (entries) {
+    cleanup () {
+      while (this.cleanupTasks.length) this.cleanupTasks.pop()();
+    }
+
+    listen(event, element, callback) {
+      element.addEventListener(event, callback);
+      this.cleanupTasks.push(() => {
+        element.removeEventListener(event, callback);
+      });
+    }
+
+    // Events
+
+    handleSentinelIntersection (entries) {
       if (this.ignoreIntersection) {
         return;
       }
@@ -247,7 +240,7 @@
           });
         }, {
           root: this,
-          rootMargin: this.activationMargin,
+          rootMargin: `${this.activationMargin}px 0px`,
           threshold: [0, 1]
         });
         target.observeEnter.observe(target);
@@ -290,7 +283,7 @@
           });
         }, {
           root: this,
-          rootMargin: this.activationMargin,
+          rootMargin: `${this.activationMargin}px 0px`,
           threshold: 0
         });
         target.observeLeave.observe(target);
@@ -310,6 +303,8 @@
         delete target.observeLeave;
       }
     }
+
+    // Public methods
 
     activateChild (child) {
       let target;
@@ -334,10 +329,11 @@
 
       // 1. Check if fragment height is lower then activation margin + scrollHeight.
       // If lower, activate more at bottom
+      const activationMargin = this.activationMargin;
       let nextFragment = target.nextElementSibling;
       while (
         nextFragment &&
-        this.scrollHeight < this.offsetHeight + parseInt(this.activationMargin, 10)
+        this.scrollHeight < this.offsetHeight + activationMargin
       ) {
         nextFragment.active = true;
         nextFragment = nextFragment.nextElementSibling;
@@ -346,7 +342,7 @@
       // some fragments.
       if (nextFragment) {
         let total = 0;
-        while (nextFragment && total < parseInt(this.activationMargin, 10)) {
+        while (nextFragment && total < activationMargin) {
           nextFragment.active = true;
           total += nextFragment.offsetHeight
           nextFragment = nextFragment.nextElementSibling;
@@ -359,7 +355,7 @@
       let previousFragment = target.previousElementSibling;
       while (
         previousFragment &&
-        this.scrollHeight - scrollHeight < parseInt(this.activationMargin, 10)
+        this.scrollHeight - scrollHeight < activationMargin
       ) {
         previousFragment.active = true;
         previousFragment = previousFragment.previousElementSibling;
@@ -367,6 +363,22 @@
 
       // Activate intersection detection
       this.ignoreIntersection = false;
+    }
+
+    // Utils
+
+    getBooleanAttribute (name) {
+      const attr = this.getAttribute(name);
+      return attr === 'true' || attr === '' || (attr && attr !== 'false');
+    }
+
+    setBooleanAttribute (name, value) {
+      const attr = this.getAttribute(name);
+      if ((attr === null || attr === undefined) && value) {
+        this.setAttribute(name, '')
+      } else if (attr !== null && attr !== undefined && !value) {
+        this.removeAttribute(name);
+      }
     }
   }
 
