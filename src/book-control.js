@@ -21,24 +21,6 @@
     constructor () {
       super();
       this.attachShadow({mode: 'open'});
-      this.shadowRoot.innerHTML = `
-        <template type="url">
-          <style>
-            :host {
-              display: none;
-            }
-          </style>
-        </template>
-        <template type="keyboard">
-          <style>
-            :host {
-              display: none;
-            }
-          </style>
-        </template>
-        <template type="scrollbar"></template>
-        <template type="index"></template>
-      `;
     }
 
     cleanupTasks = [];
