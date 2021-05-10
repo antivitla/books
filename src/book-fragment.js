@@ -41,14 +41,10 @@
     // Public properties
 
     get active () { return this.getBooleanAttribute('active'); }
+
     set active (active) { this.setBooleanAttribute('active', active); }
 
     get src () { return this.getAttribute('src'); }
-    set src (src) {
-      if (src !== this.src) {
-        this.setAttribute('src', src);
-      }
-    }
 
     get complete () { return !this.src || !this.loading; }
 

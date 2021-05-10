@@ -167,6 +167,16 @@
 
     // Type: url
 
+    typeUrlComplete = false;
+
+    typeUrlShadowHTML = `
+      <style>
+        :host([type="url"]) {
+          display: none;
+        }
+      </style>
+    `;
+
     calculatePositionFromUrl () {
       let url = new URL(location.href);
       let hash = url.hash.replace(/^#/, '');
@@ -189,13 +199,6 @@
 
     renderUrl (url) { history.replaceState(null, null, url.href); }
 
-    typeUrlShadowHTML = `
-      <style>
-        :host([type="url"]) {
-          display: none;
-        }
-      </style>
-    `;
 
 
     // Type: keyboard
@@ -211,6 +214,8 @@
 
     // Type: scrollbar
 
+    typeScrollbarShadowHTML = ``;
+
     calculatePositionFromScrollbar () {
       //
     }
@@ -219,23 +224,8 @@
       //
     }
 
-    typeScrollbarShadowHTML = ``;
-
 
     // Utils
-
-    awaitStyled () {
-      return new Promise(resolve => {
-        const check = () => {
-          if (document.readyState === 'complete') {
-            document.removeEventListener('readystatechange', check);
-            resolve();
-            return true;
-          }
-        };
-        if (!check()) document.addEventListener('readystatechange', check);
-      });
-    }
 
     awaitChildrenComplete (parent) {
       return new Promise(resolve => {
@@ -248,28 +238,6 @@
         };
         if (!check()) parent.addEventListener('load', check);
       });
-    }
-
-    awaitElement (selector) {
-      let element = document.querySelector(selector);
-      if (element) return Promise.resolve(element);
-      else {
-        return new Promise(resolve => {
-          let observer = new MutationObserver((mutations, observer) => {
-            element = []
-              .concat(...mutations.map(mutation => Array.from(mutation.addedNodes)))
-              .filter(node => node.nodeType === Node.ELEMENT_NODE)
-              .find(node => {
-                return node.closest(selector) || node.querySelector(selector);
-              });
-            if (element) {
-              observer.disconnect();
-              resolve(element.closest(selector) || element.querySelector(selector));
-            }
-          });
-          observer.observe(document.documentElement, {childList: true, subtree: true});
-        });
-      }
     }
 
     parsePosition (position) {

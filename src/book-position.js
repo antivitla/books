@@ -38,7 +38,6 @@
       `;
     }
 
-    complete = false;
     emitPositionTimeout = 100;
     waitSetupTimeout = 800;
     DEFAULT_DEPTH = 2;
@@ -47,36 +46,25 @@
 
     // Public properties
 
-    get depth () {
-      return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10);
-    }
+    get for () { return this.getAttribute('for'); }
 
-    get margin () {
-      return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN);
-    }
+    get depth () { return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10); }
 
-    get position () {
-      return this.getPosition();
-    }
-    set position (position) {
-      this.setPosition(position);
-    }
+    get margin () { return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN); }
 
 
     // DOM references
 
     get scrollElement () {
-      if (!this.__scrollElement && this.getAttribute('for')) {
-        this.__scrollElement = document.getElementById(this.getAttribute('for'));
-      }
-      return this.__scrollElement;
+      return this.getCached('scrollElement', () => {
+        return document.getElementById(this.for);
+      });
     }
 
     get scrollElementRect () {
-      if (!this.__scrollElementRect) {
-        this.__scrollElementRect = this.scrollElement.getBoundingClientRect();
-      }
-      return this.__scrollElementRect;
+      return this.getCached('scrollElementRect', () => {
+        return this.scrollElement.getBoundingClientRect();
+      });
     }
 
 
@@ -87,36 +75,25 @@
     }
 
     attributeChangedCallback (name, previousValue, value) {
-      if (name === 'for' && value && value !== previousValue) {
-        this.setupCallback();
+      if (name === 'for' && value && value !== previousValue && this.isConnected) {
+        this.bookReferenceChangedCallback(value);
       }
     }
 
     connectedCallback () {
-      this.setupCallback();
+      if (this.for) this.bookReferenceChangedCallback(this.for);
     }
 
     disconnectedCallback () {
       this.cleanup();
     }
 
-    setupCallback () {
-      // try to setup
-      this.complete = this.setup();
-      // if failed, wait for a better moment
-      if (!this.complete && document.readyState === 'loading') {
-        document.addEventListener('readystatechange', () => this.setupCallback(), {once: true});
-      } else if (!this.complete && document.readyState !== 'loading') {
-        setTimeout(() => this.setupCallback(), this.waitSetupTimeout);
-      }
-    }
-
-    setup () {
+    bookReferenceChangedCallback (id) {
       this.cleanup();
-      if (this.scrollElement) {
-        this.listen('scroll', this.scrollElement, this.handleScroll);
-        return true;
-      }
+      this.awaitElement(`#${id}`).then(element => {
+        this.setCached('scrollElement', element);
+        this.listen('scroll', element, this.handleScroll);
+      });
     }
 
 
@@ -141,7 +118,7 @@
     }
 
 
-    // Expensive calculations
+    // Public methods
 
     getPosition () {
       let d = Date.now();
@@ -151,7 +128,7 @@
       const position = [];
       let container = this.scrollElement;
       while (container && container.children.length) {
-        let i = this.getVisibleElementIndex(container, margin, this.scrollElementRect);
+        let i = this.calculateVisibleElementIndex(container, margin, this.scrollElementRect);
         if (i < 0) {
           break;
         }
@@ -193,7 +170,10 @@
       this.scrollElement.scrollTop += Math.round(-1 * margin * target.offsetHeight);
     }
 
-    getVisibleElementIndex(container, margin, contextRect) {
+
+    // Expensive calculations
+
+    calculateVisibleElementIndex(container, margin, contextRect) {
       const children = Array.from(container.children);
       const visibleChildren = children.filter(child => child.getClientRects().length);
       const index = BinarySearch(visibleChildren, null, (child, value, index) => {

@@ -69,7 +69,7 @@
 
     attributeChangedCallback (name, previousValue, value) {
       if (name === 'activation-margin' && value !== previousValue) {
-        this.setup();
+        this.setupCallback();
       }
     }
 
@@ -77,7 +77,7 @@
       this.cleanup();
     }
 
-    setup () {
+    setupCallback () {
       this.cleanup();
       this.listen('book-scroll-intersection', this, this.handleScrollIntersection);
       this.observeSentinel = new IntersectionObserver(this.handleSentinelIntersectionBinded, {

@@ -30,25 +30,25 @@ describe('book-position', () => {
   it('for simple use-case return first depth children position', () => {
     cy.visit(page({size: 300, count: 10}));
     cy.get('book-position').then($el => {
-      $el.get(0).position = [4];
-      console.log($el.get(0).position);
-      expect($el.get(0).position[0]).to.equal(4);
+      $el.get(0).setPosition([4]);
+      console.log($el.get(0).getPosition());
+      expect($el.get(0).getPosition()[0]).to.equal(4);
     });
     cy.get('book-scroll').then($el => {
       expect($el.get(0).children[4].active).to.be.true;
     });
 
     cy.get('book-position').then($el => {
-      $el.get(0).position = [0];
-      expect($el.get(0).position[0]).to.equal(0);
+      $el.get(0).setPosition([0]);
+      expect($el.get(0).getPosition()[0]).to.equal(0);
     });
     cy.get('book-scroll').then($el => {
       expect($el.get(0).children[0].active).to.be.true;
     });
 
     cy.get('book-position').then($el => {
-      $el.get(0).position = [6];
-      expect($el.get(0).position[0]).to.equal(6);
+      $el.get(0).setPosition([6]);
+      expect($el.get(0).getPosition()[0]).to.equal(6);
     });
     cy.get('book-scroll').then($el => {
       expect($el.get(0).children[6].active).to.be.true;
