@@ -7,7 +7,7 @@
 
   // Window
   else if (!name) {
-    console.error('No name for root export', factory.name, factory().name);
+    console.error('No name for root export of', factory.name, factory().name);
   } else if (root[name]) {
     console.warn('Already exported to root', name);
   } else {
@@ -27,10 +27,13 @@
             from {
               transform: rotate(0deg);
             }
-
             to {
               transform: rotate(360deg);
             }
+          }
+
+          .material-icons {
+            font-family: Material Icons;
           }
 
           /* Url */
@@ -45,21 +48,22 @@
             display: block;
             position: fixed;
             z-index: 1000;
-            top: 0px;
-            right: 0px;
-            bottom: 0px;
-            width: 20px;
-            background-color: whitesmoke;
+            top: 4px;
+            right: 4px;
+            bottom: 4px;
+            width: 12px;
+          }
+
+          :host([type="scrollbar"]:hover),
+          :host(.scrollbar-drag) {
+            width: 24px;
           }
 
           .scrollbar-track {
             display: block;
             position: relative;
-            width: 20px;
-            height: calc(100% - 0px);
-            margin-right: 0px;
-            margin-left: auto;
-            background-color: rgba(230, 230, 230, 1);
+            width: 100%;
+            height: 100%;
           }
 
           .scrollbar-thumb {
@@ -67,11 +71,10 @@
             width: 100%;
             box-sizing: border-box;
             min-height: var(--book-scrollbar-thumb-min-height, 50px);
-            top: 0%;
+            top: 0px;
             right: 0px;
-            border: solid #e6e6e6 4px;
-            border-radius: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.6);
             cursor: pointer;
           }
 
@@ -79,13 +82,13 @@
 
           :host([type="running"]) {
             display: block;
-            padding-right: 20px;
           }
 
           .running-breadcrumbs {
-            font-size: small;
+            font-size: medium;
+            font-style: italic;
             text-align: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
           }
 
           .running-breadcrumbs:empty {
@@ -101,6 +104,12 @@
             text-decoration: underline;
           }
 
+          .running-breadcrumbs header .author,
+          .running-breadcrumbs header .prefix {
+            display: none;
+          }
+
+          .running-breadcrumbs header .author:after,
           .running-breadcrumbs header .prefix:after {
             content: '. ';
           }
@@ -111,6 +120,7 @@
 
           .running-header {
             text-align: center;
+            font-size: larger;
           }
 
           .running-header:empty:after {
@@ -118,7 +128,7 @@
             display: block;
             width: 24px;
             height: 24px;
-            border: solid 2px #303030;
+            border: solid 2px;
             border-right-color: transparent;
             border-radius: 50%;
             box-sizing: border-box;
@@ -126,8 +136,34 @@
             animation: spin 0.5s linear infinite;
           }
 
+          .running-header .author,
+          .running-header .prefix {
+            display: block;
+            font-size: 50%;
+            text-transform: uppercase;
+            margin-top: 0.75rem;
+          }
+
+          .runnning-breadcrumbs:empty + .running-header .prefix {
+            margin-top: 0;
+          }
+
+          .running-header .author:after,
           .running-header .prefix:after {
-            content: '. ';
+            content: '';
+          }
+
+          .running-header header[data-depth="1"],
+          .running-header header[data-depth="2"],
+          .running-header header[data-depth="3"],
+          .running-header header[data-depth="4"] {
+            color: #B35E54;
+          }
+
+          .running-header header[data-depth="1"] .title,
+          .running-header header[data-depth="2"] .title,
+          .running-header header[data-depth="3"] .title {
+            font-weight: bold;
           }
 
           /* Index */
@@ -145,7 +181,7 @@
             display: block;
             width: 24px;
             height: 24px;
-            border: solid 2px #303030;
+            border: solid 2px;
             border-right-color: transparent;
             border-radius: 50%;
             box-sizing: border-box;
@@ -167,9 +203,31 @@
             cursor: pointer;
           }
 
-          .index header:hover {
-            /* text-decoration: underline; */
-            /* border-left: inset solid 2px; */
+          .index header[data-depth="1"],
+          .index header[data-depth="2"],
+          .index header[data-depth="3"] {
+            color: var(--book-header-highlight-color, #B35E54);
+          }
+
+          .index header[data-depth="1"] .title,
+          .index header[data-depth="2"] .title,
+          .index header[data-depth="3"] .title,
+          .index header[data-depth="4"] .title {
+            font-weight: bold;
+          }
+
+          .index header .author,
+          .index header .prefix {
+            display: block;
+            font-size: 75%;
+          }
+
+          .index li li li li header {
+            font-size: smaller;
+          }
+
+          .index li {
+            position: relative;
           }
 
           .index li header {
@@ -196,60 +254,27 @@
             padding-left: 4.5rem;
           }
 
-          .index header .author {
-            display: block;
-            font-size: 75%;
+          .index header[data-depth="2"] ~ ul,
+          .index header[data-depth="3"] ~ ul {
+            /* display: none; */
           }
 
-          .index header .prefix {
+          .index-toggle-collapse {
+            display: none;
+            background: none;
+            border: 0;
             display: block;
-            font-size: 75%;
-          }
-
-          /*
-
-          .index-entry {
-            list-style: none;
-            margin-bottom: 0.5rem;
+            position: absolute;
+            right: 0;
+            top: 0.5rem;
+            font-size: 1rem;
             cursor: pointer;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            color: var(--book-header-highlight-color, #B35E54);
           }
-
-          .index-entry[data-depth="1"] {
-            margin-left: 0rem;
-          }
-
-          .index-entry[data-depth="2"] {
-            margin-left: 0.25rem;
-          }
-
-          .index-entry[data-depth="3"] {
-            margin-left: 0.5rem;
-          }
-
-          .index-entry[data-depth="4"] {
-            margin-left: 1rem;
-            font-size: 87.5%;
-          }
-
-          .index-entry[data-depth="5"] {
-            margin-left: 1.25rem;
-            font-size: 75%;
-          }
-
-          .index-entry[data-depth="6"] {
-            margin-left: 1.5rem;
-            font-size: 62.5%;
-          }
-
-          .index-entry-prefix {
-            font-size: 75%;
-          }
-
-          .index-entry-author {
-            font-size: 75%;
-          }
-
-          */
         </style>
         <template type="scrollbar">
           <div class="control scrollbar-track">
@@ -274,19 +299,23 @@
       this.handleMouseThumbBinded = this.handleMouseThumb.bind(this);
       this.handleMouseTrackBinded = this.handleMouseTrack.bind(this);
       this.handleClickPositionElementBinded = this.handleClickPositionElement.bind(this);
+      // this.handleClickToggleCollapseBinded = this.handleClickToggleCollapse.bind(this);
+      console.log('HTMLBookScrollControlElement', this.getAttribute('type'));
     }
 
     cleanupTasks = [];
     complete = false;
     initUrlComplete = false;
+    initRunningComplete = false;
     runningTimeout = 100;
     resizeTimeout = 500;
 
     DEFAULT_POSITION = [0];
     DEFAULT_DEBOUNCE = 0;
     DEFAULT_THRESHOLD = 0;
-    DEFAULT_SCROLL_FASTER = 'page';
+    DEFAULT_SCROLL_FASTER = ['page', 'position'][0];
     DEFAULT_RUNNING_DEPTH = 2;
+    DEFAULT_INDEX_COLLAPSE_DEPTH_LIST = [3];
 
 
     // Public properties
@@ -311,7 +340,17 @@
       return parseInt(this.getAttribute('running-depth') || this.DEFAULT_RUNNING_DEPTH, 10);
     }
 
+    get indexCollapseDepthList () {
+      let attribute = this.getAttribute('index-collapse-depth');
+      return attribute
+        ? attribute.split(/,\s*|\s+/)
+          .filter(depth => depth.trim())
+          .map(depth => parseInt(depth, 10))
+        : this.DEFAULT_INDEX_COLLAPSE_DEPTH_LIST;
+    }
+
     get positionInUrl () {
+      console.log('positionInUrl GET');
       const hash = location.hash.replace(/^#/, '');
       if (hash) {
         const temp = new URL(location.origin);
@@ -342,7 +381,7 @@
     }
 
     get positionInScrollbar () {
-      return this.calculatePositionInScrollbar(this.scrollbarThumbPositionPx);
+      return this.calculatePositionInScrollbar(this.scrollbarPositionPx);
     }
 
     set positionInScrollbar (position) {
@@ -415,8 +454,9 @@
       return this.scrollbarTrackFullSizePx / this.scrollbarTotalPoints;
     }
 
-    get scrollbarThumbPositionPx () {
-      return this.__scrollbarThumbPositionPx;
+    get scrollbarPositionPx () {
+      console.log('scrollbarPositionPx GET');
+      return this.__scrollbarPositionPx;
     }
 
     get scrollbarTrackElementRect () {
@@ -424,6 +464,10 @@
         this.__scrollbarTrackElementRect = this.scrollbarTrackElement.getBoundingClientRect();
       }
       return this.__scrollbarTrackElementRect;
+    }
+
+    get indexModel () {
+      return this.__indexModel;
     }
 
     get indexModelPromise () {
@@ -465,7 +509,7 @@
 
     get scrollPositionElement () {
       if (this.getAttribute('for')) {
-        return document.querySelector(`book-scroll-position[for="${this.getAttribute('for')}"]`)
+        return document.querySelector(`book-position[for="${this.getAttribute('for')}"]`)
       }
     }
 
@@ -590,6 +634,7 @@
     }
 
     connectedCallback () {
+      console.log('LC: connected');
       // Init requires scrollElement and scrollPositionElement
       // to be present. We try to init at key time points, hoping
       // to have them in DOM. At last, if they wont, we setup
@@ -612,6 +657,7 @@
 
     setupCallback () {
       if (this.scrollElement && this.scrollPositionElement) {
+        console.log('LC: required elements present');
         this.cleanup();
 
         // Common
@@ -625,10 +671,10 @@
         // Type: scrollbar
         else if (this.controlType === 'scrollbar' && this.scrollbarThumbElement) {
           this.listen('resize', window, this.handleResizeBinded);
+          this.listen('click', this.scrollbarTrackElement, this.handleMouseTrackBinded);
           this.listen('mousedown', this.scrollbarThumbElement, this.handleMouseThumbBinded);
           this.listen('mouseup', document, this.handleMouseThumbBinded);
           this.listen('mousemove', document, this.handleMouseThumbBinded);
-          this.listen('click', this.scrollbarTrackElement, this.handleMouseTrackBinded);
         }
 
         // Type: index
@@ -646,6 +692,7 @@
         // Setup callback when all fragments with DOM are loaded
         const children = Array.from(this.scrollElement.children);
         const checkComplete = () => {
+          console.log('LC checking:', document.readyState);
           if (!children.filter(child => !child.complete).length) {
             this.scrollElement.removeEventListener('load', checkComplete);
             this.fragmentsCompletedCallback();
@@ -669,8 +716,11 @@
         this.__scrollbarTrackModel = this.calculateScrollTrackModel();
       }
 
-      // Type: index
-      else if (this.controlType === 'index') {
+      // Type: index & running
+      else if (this.controlType.match(/index|running/)) {
+        // 1. calculate index model for both
+        // 2. for index, calc tree and render
+
         this.indexModelPromise.then(model => {
           // this.renderIndex(model, this.indexElement);
         });
@@ -679,10 +729,22 @@
         });
       }
 
+      // Type: running
+      else if (this.controlType === 'running') {
+        this.indexModelPromise.then(model => {
+          // const running = this.calculateRunningFromIndexModel(model, position);
+          // this.renderHeader(running.header, this.runningHeaderElement);
+          // this.renderBreadcrumbs(running.breadcrumbs, this.runningBreadcrumbsElement);
+        });
+      }
+
+      console.log('LC: fragments ready');
+
       // 2. State: when resolved, DOM and styles will be ready
       (function () {
         return new Promise(resolve => {
           const check = () => {
+            console.log('LC: document.readyState', document.readyState);
             if (document.readyState === 'complete') {
               document.removeEventListener('readystatechange', check);
               resolve();
@@ -692,6 +754,8 @@
           if (!check()) document.addEventListener('readystatechange', check);
         });
       }()).then(() => {
+
+        console.log('LC: document complete');
 
         // Type: url
         if (this.controlType === 'url') {
@@ -737,14 +801,11 @@
 
       // Type: running (render running header & breadcrumbs)
       else if (this.controlType === 'running') {
-        delete this.__runningTimeoutId;
-        this.__runningTimeoutId = setTimeout(() => {
-          this.indexModelPromise.then(model => {
-            const running = this.calculateRunningFromIndexModel(model, position);
-            this.renderHeader(running.header, this.runningHeaderElement);
-            this.renderBreadcrumbs(running.breadcrumbs, this.runningBreadcrumbsElement);
-          });
-        }, this.runningTimeout);
+        this.indexModelPromise.then(model => {
+          const running = this.calculateRunningFromIndexModel(model, position);
+          this.renderHeader(running.header, this.runningHeaderElement);
+          this.renderBreadcrumbs(running.breadcrumbs, this.runningBreadcrumbsElement);
+        });
       }
     }
 
@@ -835,6 +896,7 @@
         this.scrollElement.style.userSelect = 'none'; // prevent accidental text selecting
         this.__dragPending = true;
         this.__dragShift = event.clientY - this.scrollbarThumbElement.getBoundingClientRect().top;
+        this.classList.add('scrollbar-drag');
       }
 
       // Stop drag
@@ -844,6 +906,7 @@
         delete this.__dragShift;
         delete this.__dragPreviousClientY;
         delete this.__dragPreviousTop;
+        this.classList.remove('scrollbar-drag');
       }
     }
 
@@ -863,6 +926,7 @@
     // Expensive calculations
 
     calculateScrollTrackModel () {
+      console.log('calculateScrollTrackModel');
       let scrollbarTrackModel = [0];
       for (let fragment of this.scrollElement.children) {
         const count = fragment.active
@@ -874,6 +938,7 @@
     }
 
     calculateScrollThumbSizePoints () {
+      console.log('calculateScrollThumbSizePoints');
       const screenHeight = this.scrollElement.offsetHeight * (1 - this.scrollPositionElement.margin);
       // First, if fragments are smaller then screen,
       // accumulate their children count
@@ -920,8 +985,9 @@
     }
 
     calculatePositionInScrollbar (px) {
+      console.log('calculatePositionInScrollbar');
       if (typeof px === 'undefined') {
-        px = this.scrollbarThumbPositionPx;
+        px = this.scrollbarPositionPx;
       }
       let positionRelative = px / this.scrollbarTrackSizePx;
       let positionPoints = positionRelative * this.scrollbarTotalPoints;
@@ -939,19 +1005,24 @@
     }
 
     calculateRunningFromIndexModel (model, position) {
+      console.log('calculateRunningFromIndexModel');
+      console.log(model, position);
       // Calculate header
       let headerIndex = model.findIndex((item, i) => {
         return (
-          item.position[0] <= position[0] &&
-          item.position[1] <= position[1] &&
+          (position[0] >= item.position[0] && position[1] >= item.position[1]) &&
           (
             !model[i + 1] ||
-            model[i + 1].position[0] > position[0] ||
-            (model[i + 1].position[0] === position[0] && model[i + 1].position[1] > position[1])
+            position[0] < model[i + 1].position[0] ||
+            (position[0] === model[i + 1].position[0] && position[1] < model[i + 1].position[1])
           )
         );
       });
-      while (model[headerIndex].depth > this.runningDepth) headerIndex -= 1;
+      if (headerIndex < 0) {
+        console.log(new Error('running header'));
+      }
+      console.log(headerIndex);
+      while (headerIndex > 0 && model[headerIndex].depth > this.runningDepth) headerIndex -= 1;
       const runningHeader = model[headerIndex];
 
       // Calculate breadcrumbs
@@ -973,6 +1044,7 @@
     }
 
     async calculateIndexModel () {
+      console.log('calculateIndexModel');
       // map headers to position
       // map position to headers
       // have a tree of headers
@@ -980,16 +1052,16 @@
       const tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']; // index tags
       const fragmentsTotal = this.scrollElement.children.length;
       let fragmentPosition = 0; // Position[0]
-      for await (let fragmentElement of this.scrollElement.children) {
+      for (let fragmentElement of this.scrollElement.children) {
+        console.log(fragmentElement);
         const fragment = fragmentElement.active
           ? fragmentElement
           : fragmentElement.children[0].content;
-        for await (let tag of tags) {
-          for await (let header of fragment.querySelectorAll(tag)) {
-            await new Promise(resolve => {
-              header.classList.add('index');
-              setTimeout(() => resolve(), 5);
-            });
+        for (let tag of tags) {
+          const items = fragment.querySelectorAll(tag);
+          console.log('items', tag, items);
+          for (let header of items) {
+            header.classList.add('index');
           }
         }
         // Collect headers in their order
@@ -1048,7 +1120,6 @@
         }
       });
       return tree;
-      console.log(tree);
     }
 
 
@@ -1075,6 +1146,11 @@
       delete this.__scrollbarTrackElementRect;
     }
 
+    clearIndexModelCache () {
+      delete this.__indexModel;
+      delete this.__indexModelTree;
+    }
+
 
     // Render methods
 
@@ -1083,8 +1159,13 @@
     }
 
     setScrollbarThumbElementPositionPx (y) {
-      this.__scrollbarThumbPositionPx = y;
+      console.log('setScrollbarThumbElementPositionPx', y);
+      this.__scrollbarPositionPx = y;
       this.scrollbarThumbElement.style.top = `${y}px`;
+    }
+
+    renderScrollbarThumb ({ height, top }) {
+      this.scrollbar.thumb.st
     }
 
     renderIndex (model, element) {
@@ -1103,6 +1184,7 @@
         tree.children.map(branch => this.branchHTML(branch)).join('')
       }</ul>`;
       element.replaceChildren(template.content);
+      console.log('tree collapses', this.indexCollapseDepthList);
     }
 
     renderHeader (header, element) {
@@ -1123,18 +1205,27 @@
       if (!branch.children || !branch.children.length) {
         return `<li>${this.headerHTML(branch)}</li>`;
       } else {
-        return `<li>${this.headerHTML(branch)}<ul>${
+        const toggle = this.indexCollapseDepthList.indexOf(branch.depth) > -1;
+        return `<li>${this.headerHTML(branch)}${toggle ? this.toggleCollapseHTML() : ''}<ul>${
           branch.children.map(child => this.branchHTML(child)).join('')
         }</ul></li>`;
       }
     }
 
     headerHTML (header) {
-      return `<header data-position="${header.position.join(',')} data-depth="${header.depth}">${
+      return `<header data-position="${header.position.join(',')}" data-depth="${header.depth}">${
         ['author', 'prefix', 'title'].map(item => {
           return header[item] ? `<span class="${item}">${header[item]}</span>` : '';
         }).join('')
       }</header>`;
+    }
+
+    expandIconHtml () {
+      return `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M24 24H0V0h24v24z" fill="none" opacity=".87"/><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6-1.41-1.41z"/></svg>`;
+    }
+
+    toggleCollapseHTML () {
+      return `<button class="index-toggle-collapse"><span class="material-icons">expand_more</span></button>`
     }
   }
 

@@ -137,10 +137,10 @@ describe('book-scroll', () => {
     cy.get('book-scroll > book-fragment[active]:first-child').should('have.length', 0);
   });
 
-  xit('emit \'book-scroll-position\' event on scroll end', done => {
+  xit('emit \'book-position\' event on scroll end', done => {
     cy.visit(customPage({count: 10, size: 100, margin: 1000}));
     cy.get('book-scroll').then($el => {
-      $el.get(0).addEventListener('book-scroll-position', event => {
+      $el.get(0).addEventListener('book-position', event => {
         let { fragment, fragmentChild, index } = event.detail.position;
         console.log(fragment, fragmentChild, index);
         expect(fragment.constructor.name.match(/^HTML.+Element$/)).to.be.ok;

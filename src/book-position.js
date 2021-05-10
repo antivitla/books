@@ -14,14 +14,14 @@
     root[name] = factory(root.BinarySearch);
   }
 
-} (this, 'HTMLBookScrollPositionElement', function (BinarySearch) {
+} (this, 'HTMLBookPositionElement', function (BinarySearch) {
   'use strict';
 
-  class HTMLBookScrollPositionElement extends HTMLElement {
+  class HTMLBookPositionElement extends HTMLElement {
     constructor() {
       super();
       this.handleScrollBinded = this.handleScroll.bind(this);
-      console.log('HTMLBookScrollPositionElement constructor');
+      // console.log('HTMLBookPositionElement constructor');
     }
 
     complete = false;
@@ -34,12 +34,20 @@
 
     // Public properties
 
-    get depth () { return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10); }
+    get depth () {
+      return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10);
+    }
 
-    get margin () { return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN); }
+    get margin () {
+      return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN);
+    }
 
-    get position () { return this.getPosition(); }
-    set position (position) { this.setPosition(position); }
+    get position () {
+      return this.getPosition();
+    }
+    set position (position) {
+      this.setPosition(position);
+    }
 
 
     // DOM references
@@ -227,7 +235,7 @@
     }
   }
 
-  customElements.define('book-scroll-position', HTMLBookScrollPositionElement);
+  customElements.define('book-position', HTMLBookPositionElement);
 
-  return HTMLBookScrollPositionElement;
+  return HTMLBookPositionElement;
 }));

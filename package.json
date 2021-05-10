@@ -4,9 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest .+\\.test\\.js$",
-    "test:dev": "jest .+\\.test\\.js$ --watch",
-    "test:e2e": "cypress open"
+    "test": "jest src\/.+\\.test\\.js$",
+    "test:dev": "jest src\/.+\\.test\\.js$ --watch",
+    "test:e2e": "cypress open",
+    "jest:raw": "jest",
+    "cypress:raw": "cypress"
   },
   "repository": {
     "type": "git",

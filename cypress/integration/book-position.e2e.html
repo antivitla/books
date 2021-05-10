@@ -7,8 +7,7 @@
   <script src="../../src/book-fragment.js"></script>
   <script src="../../src/book-scroll.js"></script>
   <script src="../../src/binary-search.js"></script>
-  <script src="../../src/book-scroll-position.js"></script>
-  <script src="../../src/book-scroll-control.js"></script>
+  <script src="../../src/book-position.js"></script>
   <style>
     body {
       margin: 0;
@@ -23,13 +22,6 @@
       border-bottom: 0;
       font-size: 18px;
       overflow: hidden;
-      /* display: flex; */
-      /* flex-direction: column; */
-    }
-    .part > div {
-      flex-grow: 1;
-      height: 20%;
-      outline: solid crimson 1px;
     }
     .part:last-child {
       border-bottom: solid 5px;
@@ -47,22 +39,10 @@
     .color-7 { background-color: coral; }
     .color-8 { background-color: darkkhaki; }
     .color-9 { background-color: darksalmon; }
-    .margin {
-      position: absolute;
-      top: 5vh;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background-color: blue;
-    }
   </style>
 </head>
 <body>
-<div class="margin"></div>
-<book-scroll-control for="book-scroll" type="url"></book-scroll-control>
-<book-scroll-control for="book-scroll" type="scrollbar" scroll-threshold="100"></book-scroll-control>
-
-<book-scroll-position for="book-scroll" margin="0.05" depth="2"></book-scroll-position>
+<book-position for="book-scroll" margin="0.05"></book-position>
 <book-scroll id="book-scroll"></book-scroll>
 <script>
   (function () {
@@ -113,30 +93,17 @@
     bookScroll.append(fragment);
 
     // Fill with random text
-    fetch('https://fish-text.ru/get?type=sentence&number=40')
+    fetch('https://fish-text.ru/get?type=paragraph&number=40')
       .then(response => response.json())
       .then(json => json.text)
       .then(text => {
-        const lines = text.split('. ');
-        const parts = Array.from(bookScroll.querySelectorAll('.part:not(.measure)'));
+        const lines = text.split('\\n\\n');
+        const parts = Array.from(bookScroll.querySelectorAll('.part'));
         parts.forEach((part, index) => {
-          const size = Math.round(3 + Math.random()*3);
-          const html = lines[index].split(' ').slice(0,size).map(word => {
-            return `<div style="height: ${100 / size}%">${word}</div>`
+          part.innerHTML = lines[index].split(' ').map(word => {
+            return `<p>${word}</p>`
           }).join(' ');
-          if (part.active) {
-            part.innerHTML = html;
-          } else {
-            part.children[0].innerHTML = html;
-          }
         });
-      })
-      .finally(() => {
-        setTimeout(() => {
-          const scrollbar = document.querySelector('book-scroll-control[type="scrollbar"]');
-          scrollbar.clearScrollbarCache();
-          document.querySelector('book-scroll-position').emitPositionChange();
-        }, 500);
       });
   }());
 </script>

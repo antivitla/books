@@ -28,12 +28,12 @@
             display: block;
             overflow: auto;
             height: 100vh;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            /* -ms-overflow-style: none; */
+            /* scrollbar-width: none; */
           }
-          :host::-webkit-scrollbar {
+          /* :host::-webkit-scrollbar {
             display: none;
-          }
+          } */
         </style>
         <div class="book-scroll-sentinel top"></div>
         <slot></slot>
