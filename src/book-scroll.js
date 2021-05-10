@@ -2,26 +2,25 @@
 
   // Commonjs
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = factory();
+    module.exports = factory(require('./book-element'));
   }
 
   // Window
   else if (!name) {
-    console.error('No name for root export of', factory.name, factory().name);
+    console.error('No name for root export of', factory.name, factory(root.HTMLBookElement).name);
   } else if (root[name]) {
     console.warn('Already exported to root', name);
   } else {
-    root[name] = factory();
+    root[name] = factory(root.HTMLBookElement);
   }
 
-} (this, 'HTMLBookScrollElement', function () {
+} (this, 'HTMLBookScrollElement', function (HTMLBookElement) {
   'use strict';
 
-  class HTMLBookScrollElement extends HTMLElement {
+  class HTMLBookScrollElement extends HTMLBookElement {
 
     constructor () {
       super();
-      this.attachShadow({mode: 'open'});
       this.shadowRoot.innerHTML = `
         <style>
           :host {
@@ -42,7 +41,6 @@
       this.handleSentinelIntersectionBinded = this.handleSentinelIntersection.bind(this);
     }
 
-    cleanupTasks = [];
     DEFAULT_ACTIVATION_MARGIN = 2000; // px
 
 
@@ -355,49 +353,6 @@
 
       // Activate intersection detection
       this.ignoreIntersection = false;
-    }
-
-
-    // Utils
-
-    listen (event, target, callback, group) {
-      const callbackBinded = callback.bind(this);
-      const cleanupTask = () => target.removeEventListener(event, callbackBinded);
-      target.addEventListener(event, callbackBinded);
-      this.cleanupTasks.push(group ? [group, cleanupTask] : cleanupTask);
-    }
-
-    cleanup (group) {
-      if (group) {
-        this.cleanupTasks = this.cleanupTasks.filter(task => {
-          if (Array.isArray(task) && task[0] === group) {
-            task[1]();
-            return false;
-          } else {
-            return true;
-          }
-        });
-      } else {
-        while (this.cleanupTasks.length) {
-          const task = this.cleanupTasks.shift();
-          if (Array.isArray(task)) task[1]();
-          else task();
-        };
-      }
-    }
-
-    getBooleanAttribute (name) {
-      const attr = this.getAttribute(name);
-      return attr === 'true' || attr === '' || (attr && attr !== 'false');
-    }
-
-    setBooleanAttribute (name, value) {
-      const attr = this.getAttribute(name);
-      if ((attr === null || attr === undefined) && value) {
-        this.setAttribute(name, '')
-      } else if (attr !== null && attr !== undefined && !value) {
-        this.removeAttribute(name);
-      }
     }
   }
 

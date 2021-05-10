@@ -2,29 +2,25 @@
 
   // Commonjs
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = factory();
+    module.exports = factory(require('./book-element'));
   }
 
   // Window
   else if (!name) {
-    console.error('No name for root export of', factory.name, factory().name);
+    console.error('No name for root export of', factory.name, factory(root.HTMLBookElement).name);
   } else if (root[name]) {
     console.warn('Already exported to root', name);
   } else {
-    root[name] = factory();
+    root[name] = factory(root.HTMLBookElement);
   }
 
-} (this, 'HTMLBookControlElement', function () {
+} (this, 'HTMLBookControlElement', function (HTMLBookElement) {
   'use strict';
 
-  class HTMLBookControlElement extends HTMLElement {
+  class HTMLBookControlElement extends HTMLBookElement {
     constructor () {
       super();
-      this.attachShadow({mode: 'open'});
     }
-
-    cleanupTasks = [];
-
 
     // Properties
 
@@ -228,32 +224,6 @@
 
     // Utils
 
-    listen (event, target, callback, group) {
-      const callbackBinded = callback.bind(this);
-      const cleanupTask = () => target.removeEventListener(event, callbackBinded);
-      target.addEventListener(event, callbackBinded);
-      this.cleanupTasks.push(group ? [group, cleanupTask] : cleanupTask);
-    }
-
-    cleanup (group) {
-      if (group) {
-        this.cleanupTasks = this.cleanupTasks.filter(task => {
-          if (Array.isArray(task) && task[0] === group) {
-            task[1]();
-            return false;
-          } else {
-            return true;
-          }
-        });
-      } else {
-        while (this.cleanupTasks.length) {
-          const task = this.cleanupTasks.shift();
-          if (Array.isArray(task)) task[1]();
-          else task();
-        };
-      }
-    }
-
     awaitStyled () {
       return new Promise(resolve => {
         const check = () => {
@@ -300,20 +270,6 @@
           observer.observe(document.documentElement, {childList: true, subtree: true});
         });
       }
-    }
-
-    getCached (name, getter) {
-      if (typeof this[`__${name}`] === 'undefined') this[`__${name}`] = getter && getter();
-      return this[`__${name}`];
-    }
-
-    setCached (name, value) {
-      this[`__${name}`] = value;
-      return this[`__${name}`];
-    }
-
-    deleteCached (cached) {
-      (Array.isArray(cached) ? cached : [cached]).forEach(name => delete this[`__${name}`]);
     }
 
     parsePosition (position) {

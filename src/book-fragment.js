@@ -2,19 +2,19 @@
 
   // Commonjs
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = factory();
+    module.exports = factory(require('./book-element'));
   }
 
   // Window
   else if (!name) {
-    console.error('No name for root export of', factory.name, factory().name);
+    console.error('No name for root export of', factory.name, factory(root.HTMLBookElement).name);
   } else if (root[name]) {
     console.warn('Already exported to root', name);
   } else {
-    root[name] = factory();
+    root[name] = factory(root.HTMLBookElement);
   }
 
-} (this, 'HTMLBookFragmentElement', function () {
+} (this, 'HTMLBookFragmentElement', function (HTMLBookElement) {
   'use strict';
 
   // Element can be switched 'off' from the DOM, taking no computing resources,
@@ -22,10 +22,9 @@
   // with '<template>' tag. Switch is getter/setter 'active' property. This is
   // what HTMLBookFragmentElement is about.
 
-  class HTMLBookFragmentElement extends HTMLElement {
+  class HTMLBookFragmentElement extends HTMLBookElement {
     constructor () {
       super();
-      this.attachShadow({mode: 'open'});
       this.shadowRoot.innerHTML = `
         <style>
           :host {
@@ -102,23 +101,6 @@
           this.loading = false;
           this.dispatchEvent(new CustomEvent('load', {bubbles: true}));
         });
-      }
-    }
-
-
-    // Utils
-
-    getBooleanAttribute (name) {
-      const attr = this.getAttribute(name);
-      return attr === 'true' || attr === '' || (attr && attr !== 'false');
-    }
-
-    setBooleanAttribute (name, value) {
-      const attr = this.getAttribute(name);
-      if ((attr === null || attr === undefined) && value) {
-        this.setAttribute(name, '')
-      } else if (attr !== null && attr !== undefined && !value) {
-        this.removeAttribute(name);
       }
     }
   }

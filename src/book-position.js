@@ -2,25 +2,33 @@
 
   // Commonjs
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = factory(require('./binary-search'));
+    module.exports = factory(
+      require('./book-element'),
+      require('./binary-search')
+    );
   }
 
   // Window
   else if (!name) {
-    console.error('No name for root export of', factory.name, factory(root.BinarySearch).name);
+    console.error('No name for root export of', factory.name, factory(
+      root.HTMLBookElement,
+      root.BinarySearch
+    ).name);
   } else if (root[name]) {
     console.warn('Already exported to root', name);
   } else {
-    root[name] = factory(root.BinarySearch);
+    root[name] = factory(
+      root.HTMLBookElement,
+      root.BinarySearch
+    );
   }
 
-} (this, 'HTMLBookPositionElement', function (BinarySearch) {
+} (this, 'HTMLBookPositionElement', function (HTMLBookElement, BinarySearch) {
   'use strict';
 
-  class HTMLBookPositionElement extends HTMLElement {
+  class HTMLBookPositionElement extends HTMLBookElement {
     constructor() {
       super();
-      this.attachShadow({mode: 'open'});
       this.shadowRoot.innerHTML = `
         <style>
           :host {
@@ -31,7 +39,6 @@
     }
 
     complete = false;
-    cleanupTasks = [];
     emitPositionTimeout = 100;
     waitSetupTimeout = 800;
     DEFAULT_DEPTH = 2;
@@ -226,35 +233,6 @@
         }
       });
       return children.indexOf(visibleChildren[index < 0 ? Math.abs(index) - 1 : index]);
-    }
-
-
-    // Utils
-
-    listen (event, target, callback, group) {
-      const callbackBinded = callback.bind(this);
-      const cleanupTask = () => target.removeEventListener(event, callbackBinded);
-      target.addEventListener(event, callbackBinded);
-      this.cleanupTasks.push(group ? [group, cleanupTask] : cleanupTask);
-    }
-
-    cleanup (group) {
-      if (group) {
-        this.cleanupTasks = this.cleanupTasks.filter(task => {
-          if (Array.isArray(task) && task[0] === group) {
-            task[1]();
-            return false;
-          } else {
-            return true;
-          }
-        });
-      } else {
-        while (this.cleanupTasks.length) {
-          const task = this.cleanupTasks.shift();
-          if (Array.isArray(task)) task[1]();
-          else task();
-        };
-      }
     }
   }
 

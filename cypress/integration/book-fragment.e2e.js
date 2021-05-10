@@ -3,7 +3,7 @@ const { customHtmlPage, isRendered } = require('./utils');
 describe('book-fragment', () => {
   it('is displayed only if active', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment>Hello</book-fragment>', ['book-fragment.js']));
+      d.write(customHtmlPage('<book-fragment>Hello</book-fragment>', ['book-element.js', 'book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment').then($el => expect(isRendered($el)).not.to.be.true);
@@ -13,7 +13,7 @@ describe('book-fragment', () => {
 
   it('active -> inactive: wrap into template (should _not_ present in DOM)', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment active><em>Hello</em></book-fragment>', ['book-fragment.js']));
+      d.write(customHtmlPage('<book-fragment active><em>Hello</em></book-fragment>', ['book-element.js', 'book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment > em').should('have.length', 1);
@@ -25,7 +25,7 @@ describe('book-fragment', () => {
 
   it('inactive -> active: unwrap from template (should _be_ present in DOM)', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment><template><strong>Hey, man!</strong><strong>Me too.</strong></template></book-fragment>', ['book-fragment.js']));
+      d.write(customHtmlPage('<book-fragment><template><strong>Hey, man!</strong><strong>Me too.</strong></template></book-fragment>', ['book-element.js', 'book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment > strong').should('have.length', 0);
@@ -39,7 +39,7 @@ describe('book-fragment', () => {
 
   it('active (with template) -> inactive: do nothing', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment active><template><strong>Hey, man!</strong><strong>Me too.</strong></template></book-fragment>', ['book-fragment.js']));
+      d.write(customHtmlPage('<book-fragment active><template><strong>Hey, man!</strong><strong>Me too.</strong></template></book-fragment>', ['book-element.js', 'book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment > strong').should('have.length', 0);
@@ -51,7 +51,7 @@ describe('book-fragment', () => {
 
   it('inactive (without template) -> active: do nothing', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment><strong>Hey, man!</strong><strong>Me too.</strong></book-fragment>', ['book-fragment.js']));
+      d.write(customHtmlPage('<book-fragment><strong>Hey, man!</strong><strong>Me too.</strong></book-fragment>', ['book-element.js', 'book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment > strong').should('have.length', 2);
@@ -63,7 +63,7 @@ describe('book-fragment', () => {
 
   it('if supplied with src, fetch it into template, if inactive', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/some-section.html"></book-fragment>', ['book-fragment.js']));
+      d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/some-section.html"></book-fragment>', ['book-element.js', 'book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment > *').should('have.length', 1);
@@ -75,7 +75,7 @@ describe('book-fragment', () => {
 
   it('if supplied with src, fetch it directly into DOM, if active', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-fragment active src="../cypress/fixtures/some-section.html"></book-fragment>', ['book-fragment.js']));
+      d.write(customHtmlPage('<book-fragment active src="../cypress/fixtures/some-section.html"></book-fragment>', ['book-element.js', 'book-fragment.js']));
       d.close();
     });
     cy.get('book-fragment > p').should('have.length', 1);
@@ -88,7 +88,7 @@ describe('book-fragment', () => {
   describe('loading and complete logic', () => {
     it('if no src attribute, is complete right away', () => {
       cy.document().then(d => {
-        d.write(customHtmlPage('<book-fragment><span>zok</span></book-fragment>', ['book-fragment.js']));
+        d.write(customHtmlPage('<book-fragment><span>zok</span></book-fragment>', ['book-element.js', 'book-fragment.js']));
         d.close();
       });
       cy.get('book-fragment').then($el => {
@@ -98,7 +98,7 @@ describe('book-fragment', () => {
 
     it('if src attribute present, is not complete initially, but complete after load event', done => {
       cy.document().then(d => {
-        d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/section-002.html"></book-fragment>', ['book-fragment.js']));
+        d.write(customHtmlPage('<book-fragment src="../cypress/fixtures/section-002.html"></book-fragment>', ['book-element.js', 'book-fragment.js']));
         d.close();
       });
       cy.get('book-fragment').then($el => {

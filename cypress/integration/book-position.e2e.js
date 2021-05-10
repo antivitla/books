@@ -19,7 +19,7 @@ describe('book-position', () => {
 
   it('uses \'for\' attribute as target container id', () => {
     cy.document().then(d => {
-      d.write(customHtmlPage('<book-position for="id1"></book-position><div id="id1">Some content</div>', ['binary-search.js', 'book-position.js']));
+      d.write(customHtmlPage('<book-position for="id1"></book-position><div id="id1">Some content</div>', ['book-element.js', 'binary-search.js', 'book-position.js']));
       d.close();
     });
     cy.get('book-position').then($el => {
