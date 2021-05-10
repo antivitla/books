@@ -20,8 +20,14 @@
   class HTMLBookPositionElement extends HTMLElement {
     constructor() {
       super();
-      this.handleScrollBinded = this.handleScroll.bind(this);
-      // console.log('HTMLBookPositionElement constructor');
+      this.attachShadow({mode: 'open'});
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            display: none;
+          }
+        </style>
+      `;
     }
 
     complete = false;
@@ -87,7 +93,6 @@
       this.cleanup();
     }
 
-    // Setup requires special elements to be present in DOM, so we wait for them.
     setupCallback () {
       // try to setup
       this.complete = this.setup();
@@ -102,20 +107,9 @@
     setup () {
       this.cleanup();
       if (this.scrollElement) {
-        this.listen('scroll', this.scrollElement, this.handleScrollBinded);
+        this.listen('scroll', this.scrollElement, this.handleScroll);
         return true;
       }
-    }
-
-    cleanup () {
-      while (this.cleanupTasks.length) this.cleanupTasks.pop()();
-    }
-
-    listen(event, element, callback) {
-      element.addEventListener(event, callback);
-      this.cleanupTasks.push(() => {
-        element.removeEventListener(event, callback);
-      });
     }
 
 
@@ -232,6 +226,35 @@
         }
       });
       return children.indexOf(visibleChildren[index < 0 ? Math.abs(index) - 1 : index]);
+    }
+
+
+    // Utils
+
+    listen (event, target, callback, group) {
+      const callbackBinded = callback.bind(this);
+      const cleanupTask = () => target.removeEventListener(event, callbackBinded);
+      target.addEventListener(event, callbackBinded);
+      this.cleanupTasks.push(group ? [group, cleanupTask] : cleanupTask);
+    }
+
+    cleanup (group) {
+      if (group) {
+        this.cleanupTasks = this.cleanupTasks.filter(task => {
+          if (Array.isArray(task) && task[0] === group) {
+            task[1]();
+            return false;
+          } else {
+            return true;
+          }
+        });
+      } else {
+        while (this.cleanupTasks.length) {
+          const task = this.cleanupTasks.shift();
+          if (Array.isArray(task)) task[1]();
+          else task();
+        };
+      }
     }
   }
 

@@ -53,6 +53,7 @@
 
     get complete () { return !this.src || !this.loading; }
 
+
     // Lifecycle callbacks
 
     static get observedAttributes () {
@@ -103,6 +104,7 @@
         });
       }
     }
+
 
     // Utils
 

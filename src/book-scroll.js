@@ -39,12 +39,12 @@
         <slot></slot>
         <div class="book-scroll-sentinel bottom"></div>
       `;
-      this.handleScrollIntersectionBinded = this.handleScrollIntersection.bind(this);
       this.handleSentinelIntersectionBinded = this.handleSentinelIntersection.bind(this);
     }
 
     cleanupTasks = [];
     DEFAULT_ACTIVATION_MARGIN = 2000; // px
+
 
     // Public properties
 
@@ -61,6 +61,7 @@
     set ignoreIntersection (ignoreIntersection) {
       this.setBooleanAttribute('ignore-intersection', ignoreIntersection);
     }
+
 
     // Lifecycle callbacks
 
@@ -80,7 +81,7 @@
 
     setup () {
       this.cleanup();
-      this.listen('book-scroll-intersection', this, this.handleScrollIntersectionBinded);
+      this.listen('book-scroll-intersection', this, this.handleScrollIntersection);
       this.observeSentinel = new IntersectionObserver(this.handleSentinelIntersectionBinded, {
         root: this,
         rootMargin: `${this.activationMargin}px 0px`,
@@ -94,16 +95,6 @@
       });
     }
 
-    cleanup () {
-      while (this.cleanupTasks.length) this.cleanupTasks.pop()();
-    }
-
-    listen(event, element, callback) {
-      element.addEventListener(event, callback);
-      this.cleanupTasks.push(() => {
-        element.removeEventListener(event, callback);
-      });
-    }
 
     // Events
 
@@ -304,6 +295,7 @@
       }
     }
 
+
     // Public methods
 
     activateChild (child) {
@@ -365,7 +357,34 @@
       this.ignoreIntersection = false;
     }
 
+
     // Utils
+
+    listen (event, target, callback, group) {
+      const callbackBinded = callback.bind(this);
+      const cleanupTask = () => target.removeEventListener(event, callbackBinded);
+      target.addEventListener(event, callbackBinded);
+      this.cleanupTasks.push(group ? [group, cleanupTask] : cleanupTask);
+    }
+
+    cleanup (group) {
+      if (group) {
+        this.cleanupTasks = this.cleanupTasks.filter(task => {
+          if (Array.isArray(task) && task[0] === group) {
+            task[1]();
+            return false;
+          } else {
+            return true;
+          }
+        });
+      } else {
+        while (this.cleanupTasks.length) {
+          const task = this.cleanupTasks.shift();
+          if (Array.isArray(task)) task[1]();
+          else task();
+        };
+      }
+    }
 
     getBooleanAttribute (name) {
       const attr = this.getAttribute(name);
