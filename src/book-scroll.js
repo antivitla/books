@@ -49,6 +49,7 @@
     get activationMargin () {
       return parseInt(this.getAttribute('activation-margin') || this.DEFAULT_ACTIVATION_MARGIN, 10);
     }
+    
     set activationMargin (activationMargin) {
       this.setAttribute('activation-margin', activationMargin);
     }
@@ -56,6 +57,7 @@
     get ignoreIntersection () {
       return this.getBooleanAttribute('ignore-intersection');
     }
+
     set ignoreIntersection (ignoreIntersection) {
       this.setBooleanAttribute('ignore-intersection', ignoreIntersection);
     }
