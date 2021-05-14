@@ -51,8 +51,12 @@
       }
     }
 
-    getCached (name, getter) {
-      if (typeof this[`__${name}`] === 'undefined') this[`__${name}`] = getter && getter();
+    getCached (name, getter, group) {
+      if (typeof this[`__${name}`] === 'undefined' && getter) {
+        let task = () => this.deleteCached(name);
+        this.cleanupTasks.push(group ? [group, task] : task);
+        this[`__${name}`] = getter();
+      }
       return this[`__${name}`];
     }
 
@@ -106,7 +110,9 @@
         const check = () => {
           if (document.readyState === 'complete') {
             document.removeEventListener('readystatechange', check);
-            resolve();
+            setTimeout(() => {
+              resolve();
+            }, 300);
             return true;
           }
         };

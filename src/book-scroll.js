@@ -27,12 +27,7 @@
             display: block;
             overflow: auto;
             height: 100vh;
-            /* -ms-overflow-style: none; */
-            /* scrollbar-width: none; */
           }
-          /* :host::-webkit-scrollbar {
-            display: none;
-          } */
         </style>
         <div class="book-scroll-sentinel top"></div>
         <slot></slot>
@@ -49,7 +44,7 @@
     get activationMargin () {
       return parseInt(this.getAttribute('activation-margin') || this.DEFAULT_ACTIVATION_MARGIN, 10);
     }
-    
+
     set activationMargin (activationMargin) {
       this.setAttribute('activation-margin', activationMargin);
     }

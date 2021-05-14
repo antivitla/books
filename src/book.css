@@ -1,18 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
 @import url("https://use.typekit.net/nml1xlk.css");
 
 html {
-  --book-background-light: whitesmoke;
-  --book-header-highlight-color: #B35E54;
-
+  --book-background-light-color: whitesmoke;
+  --book-background-dark-color: #303030;
+  --book-text-dark-color: rgba(0, 0, 0, 0.875);
+  --book-text-light-color: rgba(255, 255, 255, 0.875);
+  --book-text-highlight-color: #B35E54;
 }
+
 
 html, body {
   font-size: 16px;
-  line-height: 1.75;
   margin: 0;
   padding: 0;
-  background-color: var(--book-background-light, whitesmoke);
 }
 
 @media (min-width: 768px) {
@@ -27,18 +28,26 @@ html, body {
   }
 }
 
+body {
+  background-color: var(--book-background-light-color);
+}
+
 .book {
-  font-family: "Old Standard TT", "Times New Roman", serif;
-  font-weight: 300;
-  font-style: normal;
+  font-family: "kazimirtext", serif;
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.625;
+  color: var(--book-text-dark-color);
 
   padding: 2rem;
-  max-width: 41rem;
+  max-width: 40rem;
   margin-left: auto;
   margin-right: auto;
 }
+
+/* .book em {
+  font-family: Merriweather;
+  font-size: 87.5%;
+} */
 
 .book strong {
   font-weight: 600;
@@ -73,7 +82,7 @@ html, body {
 .book .h8 {
   font-family: "Old Standard TT", "Playfair Display", serif;
   color: #B35E54;
-  margin: 1rem 0;
+  margin: 1rem auto 1rem auto;
   text-align: center;
 }
 
@@ -144,6 +153,26 @@ html, body {
   text-align: center;
 }
 
+.book *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) + header,
+.book *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) + h1,
+.book *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) + h2,
+.book *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) + h3,
+.book *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) + h4,
+.book *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) + h5,
+.book *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) + h6 {
+  margin-top: 3.5rem;
+}
+
+.book header + *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6),
+.book h1 + *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.prefix):not(.author),
+.book h2 + *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.prefix):not(.author),
+.book h3 + *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.prefix):not(.author),
+.book h4 + *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.prefix):not(.author),
+.book h5 + *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.prefix):not(.author),
+.book h6 + *:not(header):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.prefix):not(.author) {
+  margin-top: 1.75rem;
+}
+
 .book header p {
   margin: 0;
 }
@@ -151,6 +180,10 @@ html, body {
 .book header .author,
 .book header .prefix {
   order: -1;
+}
+
+.book header .prefix {
+  text-transform: uppercase;
 }
 
 .book header .outline-description {
@@ -169,7 +202,10 @@ html, body {
 .book header h1 + p {
   margin-bottom: -0.75rem;
   font-size: calc(3rem / 3 + 0.5rem);
-  /*color: #B35E54;*/
+}
+
+.book header h1 + .prefix {
+  font-size: 1rem;
 }
 
 .book header h1 ~ :not(.author):not(.prefix) {
@@ -182,6 +218,10 @@ html, body {
   /*color: #B35E54;*/
 }
 
+.book header h2 + .prefix {
+  font-size: 0.875rem;
+}
+
 .book header h2 ~ :not(.author):not(.prefix) {
   margin-bottom: 1.5rem;
   font-size: smaller;
@@ -191,13 +231,15 @@ html, body {
 .book header h3 ~ p {
   margin-bottom: -0.75rem;
   font-size: calc(1.5rem / 3 + 0.5rem);
-  /*color: #B35E54;*/
+}
+
+.book header h3 + .prefix {
+  font-size: 0.75rem;
 }
 
 .book header h4 ~ p {
   margin-bottom: -0.75rem;
   font-size: calc(1.125rem / 3 + 0.5rem);
-  /*color: #B35E54;*/
 }
 
 .book header h5 ~ p {
@@ -218,13 +260,8 @@ html, body {
   color: inherit;
 }
 
-.book p + h6,
-.book p + h5,
-.book p + h4,
-.book p + h3,
-.book p + h2,
-.book p + h1 {
-  margin-top: 2rem;
+.book header h6 + .prefix {
+  text-transform: none;
 }
 
 /* Footnotes */
@@ -336,9 +373,9 @@ html, body {
   font-family: "Old Standard TT", "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.5;
-  background-color: var(--book-background-light);
+  background-color: var(--book-background-light-color);
 
-  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.125);
+  box-shadow: 4px 0px 16px 0px rgba(0, 0, 0, 0.125);
   position: fixed;
   left: 0;
   top: 0;
@@ -350,6 +387,20 @@ html, body {
   transform: translateX(-100%);
   transition: transform 0.3s ease-out;
   z-index: 10;
+
+  -ms-overflow-style: 12px;
+  scrollbar-width: 12px;
+}
+
+.book-index::-webkit-scrollbar {
+  width: 20px;
+  background-color: transparent;
+}
+
+.book-index::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 9px;
+  border: solid var(--book-background-light-color) 4px;
 }
 
 .book-index.active {
@@ -385,7 +436,7 @@ html, body {
   font-family: "Old Standard TT", "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.5;
-  background-color: var(--book-background-light);
+  background-color: var(--book-background-light-color);
 
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.125);
   position: fixed;
@@ -410,19 +461,21 @@ html, body {
 }
 
 .book-header .book-index-toggle {
-  width: 24px;
-  height: 24px;
-  padding: 12px;
+  width: 42px;
+  height: 42px;
   display: block;
   position: absolute;
-  left: 0.5rem;
-  top: 0.5rem;
-  /* transform: translateY(-50%); */
+  left: 1rem;
+  top: calc(50% - 20px);
   cursor: pointer;
+  font-weight: bold;
+  font-size: 32px;
+  line-height: 42px;
+  text-align: center;
 }
 
 .book-header .book-index-toggle svg {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   display: block;
 }

@@ -54,6 +54,23 @@ describe('<book-control>', () => {
       expect(bookControl.getCached('myCached', factory)).toEqual(8);
       expect(factory.mock.calls.length).toEqual(0);
     });
+
+    test('cleanup should occur in cache', () => {
+      bookControl.getCached('myCached', () => 67);
+      bookControl.getCached('myCachedGrouped', () => 8, 'myGroup');
+      bookControl.getCached('myCachedGrouped2', () => 2, 'myGroup');
+      expect(bookControl.__myCached).toEqual(67);
+      expect(bookControl.__myCachedGrouped).toEqual(8);
+      expect(bookControl.__myCachedGrouped2).toEqual(2);
+      bookControl.cleanup('myGroup');
+      expect(bookControl.cleanupTasks.length).toEqual(1);
+      expect(bookControl.__myCached).toEqual(67);
+      expect(bookControl.__myCachedGrouped).toBeUndefined();
+      expect(bookControl.__myCachedGrouped2).toBeUndefined();
+      bookControl.cleanup();
+      expect(bookControl.cleanupTasks.length).toEqual(0);
+      expect(bookControl.__myCached).toBeUndefined();
+    });
   });
 
   describe('DOM References', () => {

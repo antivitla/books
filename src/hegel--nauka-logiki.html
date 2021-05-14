@@ -5,7 +5,9 @@
   <title>Наука логики. Гегель</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="book.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap'">
+  <link rel="stylesheet" href="https://use.typekit.net/nml1xlk.css">
+  <link rel="stylesheet" href="book.css" >
 
   <script src="binary-search.js"></script>
   <script src="book-element.js"></script>
@@ -14,9 +16,32 @@
   <script src="book-position.js"></script>
   <script src="book-control.js"></script>
   <script src="book-ui.js"></script>
+  <!-- Preload fonts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const fonts = ['kazimirtext', 'Old Standard TT'];
+      const preloadFonts = document.createElement('template');
+      preloadFonts.innerHTML = `
+        <div style="position: fixed; z-index: -1; pointer-events: none; visibility: hidden">
+          ${'x'.repeat(fonts.length).split('').map((x, index) => {
+            return '<div style="font-family: ' + fonts[index] + '">&nbsp; Hey</div>';
+          }).join('')}
+        </div>
+      `;
+      document.body.append(preloadFonts.content.cloneNode(true));
+    });
+  </script>
+
+  <style>
+    book-scroll {
+      height: 85vh;
+      position: relative;
+      top: 18px;
+      box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.6);
+    }
+  </style>
 </head>
 <body>
-
   <!-- Book floating header
   <nav class="book-header">
     <div class="book-index-toggle">&equiv;</div>
@@ -31,11 +56,18 @@
   <book-scroll-control for="hegel--nauka-logiki" type="index" index-collapse-depth="4"></book-scroll-control>
 </aside>-->
 
+<book-control for="hegel--nauka-logiki" type="url"></book-control>
 <book-control for="hegel--nauka-logiki" type="keyboard"></book-control>
-<book-control type="url" for="hegel--nauka-logiki"></book-control>
+<book-control for="hegel--nauka-logiki" type="scrollbar" x-debug></book-control>
+
 
 <!-- Position handler (required for controls) -->
-<book-position for="hegel--nauka-logiki" depth="2" margin="0.2"></book-position>
+<book-position for="hegel--nauka-logiki" depth="2" margin="0.2" x-debug></book-position>
+
+<script>
+$c = document.querySelector('book-control[type="scrollbar"]');
+$p = document.querySelector('book-position');
+</script>
 
 <!-- Book -->
 <book-scroll id="hegel--nauka-logiki" class="book-scroll" activation-margin="3000">

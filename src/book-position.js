@@ -34,11 +34,20 @@
           :host {
             display: none;
           }
+          :host([debug]) {
+            display: block;
+            position: fixed;
+            border-bottom: dashed var(--book-text-highlight-color) 2px;
+            width: 100%;
+            left: 0;
+            pointer-events: none;
+            filter: brightness(1.25);
+          }
         </style>
       `;
     }
 
-    emitPositionTimeout = 100;
+    emitPositionTimeout = 200;
     waitSetupTimeout = 800;
     DEFAULT_DEPTH = 2;
     DEFAULT_MARGIN = 0.05;
@@ -51,6 +60,8 @@
     get depth () { return parseInt(this.getAttribute('depth') || this.DEFAULT_DEPTH, 10); }
 
     get margin () { return parseFloat(this.getAttribute('margin') || this.DEFAULT_MARGIN); }
+
+    get debug () { return this.getBooleanAttribute('debug'); }
 
 
     // DOM references
@@ -92,6 +103,11 @@
       this.cleanup();
       this.awaitElement(`#${id}`).then(element => {
         this.setCached('scrollElement', element);
+        if (this.debug) {
+          this.style.top = `${
+            this.scrollElementRect.top + this.scrollElementRect.height * this.margin
+          }px`;
+        }
         this.listen('scroll', element, this.handleScroll);
       });
     }
@@ -113,7 +129,7 @@
     emitPositionChange () {
       this.dispatchEvent(new CustomEvent('change', {
         bubbles: true,
-        detail: this.position
+        detail: this.getPosition()
       }));
     }
 
@@ -121,13 +137,12 @@
     // Public methods
 
     getPosition () {
-      let d = Date.now();
       // Set margin at which element considered to be focused & 'visible'
       const margin = this.margin * this.scrollElementRect.height;
       // Get current focused & 'visible' element's position inside DOM tree
       const position = [];
       let container = this.scrollElement;
-      while (container && container.children.length) {
+      while (container && container.childElementCount) {
         let i = this.calculateVisibleElementIndex(container, margin, this.scrollElementRect);
         if (i < 0) {
           break;
@@ -153,7 +168,7 @@
       // Get target element
       let i = 0;
       let target = this.scrollElement;
-      if (position.length === 1) position.push(0);
+      if (position.length === 1) position.push(0); // normalize
       while (i < position.length && i < this.depth) {
         if (target.children && target.children[position[i]]) {
           target = target.children[position[i]]
@@ -163,11 +178,20 @@
         }
       }
       // Scroll to target element
-      // target.scrollIntoView(true);
       this.scrollElement.scrollTop = target.offsetTop;
-      // Scroll more to match margin
-      const margin = i < position.length ? position[i] : this.margin;
-      this.scrollElement.scrollTop += Math.round(-1 * margin * target.offsetHeight);
+
+      // If we are already at maximum bottom, we are done
+      if (target.offsetTop >= this.scrollElement.scrollHeight - this.scrollElement.offsetHeight) {
+        return;
+      }
+      // Scroll more to match specified shift
+      else if (i < position.length) {
+        this.scrollElement.scrollTop += -1 * position[i] * target.offsetHeight;
+      }
+      // Or use visibility margin to set position at header
+      else {
+        this.scrollElement.scrollTop += -1 * this.scrollElementRect.height * this.margin;
+      }
     }
 
 
