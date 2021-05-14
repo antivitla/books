@@ -32,6 +32,17 @@
     });
   </script>
 
+  <!-- Debug -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.book = {
+        c: document.querySelector('book-control[type="scrollbar"]'),
+        p: document.querySelector('book-position'),
+        s: document.querySelector('book-scroll')
+      }
+    });
+  </script>
+
   <style>
     book-scroll {
       height: 85vh;
@@ -42,16 +53,14 @@
   </style>
 </head>
 <body>
-  <!-- Book floating header
-  <nav class="book-header">
-    <div class="book-index-toggle">&equiv;</div>
-    <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="4"></book-scroll-control>
-    <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="4"></book-scroll-control>
-    <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="3"></book-scroll-control>
-  </nav> -->
+<!-- <nav class="book-header">
+  <div class="book-index-toggle">&equiv;</div>
+  <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="4"></book-scroll-control>
+  <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="4"></book-scroll-control>
+  <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="3"></book-scroll-control>
+</nav> -->
 
-<!-- Book index (table of contents)
-<aside class="book-index">
+<!-- <aside class="book-index">
   <book-scroll-control for="hegel--nauka-logiki" type="index" index-collapse-depth="2, 3"></book-scroll-control>
   <book-scroll-control for="hegel--nauka-logiki" type="index" index-collapse-depth="4"></book-scroll-control>
 </aside>-->
@@ -60,16 +69,8 @@
 <book-control for="hegel--nauka-logiki" type="keyboard"></book-control>
 <book-control for="hegel--nauka-logiki" type="scrollbar"></book-control>
 
-
-<!-- Position handler (required for controls) -->
 <book-position for="hegel--nauka-logiki" depth="2" margin="0.2"></book-position>
 
-<script>
-$c = document.querySelector('book-control[type="scrollbar"]');
-$p = document.querySelector('book-position');
-</script>
-
-<!-- Book -->
 <book-scroll id="hegel--nauka-logiki" class="book-scroll" activation-margin="3000">
   <book-fragment class="book" src="hegel--nauka-logiki/cover.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/k-voprosu-o-dialektike.html" src-selector="section > *"></book-fragment>
