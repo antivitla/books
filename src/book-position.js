@@ -156,7 +156,7 @@
       }
       // Add relative top margin of the target element
       const rect = container.getBoundingClientRect();
-      position.push(rect.height ? ((rect.top - this.scrollElementRect.top) / rect.height) : 0);
+      position.push(rect.height ? ((this.scrollElementRect.top - rect.top) / rect.height) : 0);
       // Element's position in DOM is an array of indexes,
       // and last item in array is always it's top margin relative to viewport:
       // [1, 2, -1.456788]
@@ -178,20 +178,14 @@
         }
       }
       // Scroll to target element
-      this.scrollElement.scrollTop = target.offsetTop;
-
-      // If we are already at maximum bottom, we are done
-      if (target.offsetTop >= this.scrollElement.scrollHeight - this.scrollElement.offsetHeight) {
-        return;
+      let scrollTop = target.offsetTop;
+      // Scroll less to match visibility margin
+      scrollTop -= this.margin * this.scrollElementRect.height
+      // If needed, scroll more to match specified shift
+      if (i < position.length) {
+        scrollTop += position[i] * target.offsetHeight;
       }
-      // Scroll more to match specified shift
-      else if (i < position.length) {
-        this.scrollElement.scrollTop += -1 * position[i] * target.offsetHeight;
-      }
-      // Or use visibility margin to set position at header
-      else {
-        this.scrollElement.scrollTop += -1 * this.scrollElementRect.height * this.margin;
-      }
+      this.scrollElement.scrollTop = scrollTop;
     }
 
 

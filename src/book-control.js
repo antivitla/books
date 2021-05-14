@@ -24,7 +24,7 @@
 
     DEFAULT = {
       dragDebounce: 200,
-      dragThreshold: 100
+      dragThreshold: 200
     };
 
     // Properties
@@ -40,8 +40,6 @@
     get dragThreshold () {
       return parseInt(this.getAttribute('drag-threshold') || this.DEFAULT.dragThreshold, 10);
     }
-
-    get scrollFaster () { return this.getAttribute('scroll-faster'); }
 
     get debug () { return this.getBooleanAttribute('debug'); }
 
@@ -102,21 +100,18 @@
       if (this.controlType) this.controlTypeChangedCallback(this.controlType);
       // Collect and cleanup props set by 'setCached'
       this.cleanupTasks.push(() => this.deleteCached([
-        'bookScrollElement',
         'bookPositionElement',
+        'bookScrollElement',
         'bookPosition',
         'trackModel',
         'indexModel',
         'indexTreeModel',
-        'typeScrollbarThumbInitialHeight',
-        'typeScrollbarThumbMinHeight',
-        'typeScrollbarThumbIsDistorted',
-        'typeScrollbarDragClientY',
-        'typeScrollbarDragTop',
+        'typeScrollbarDragStart',
         'typeScrollbarDragThreshold',
         'typeScrollbarDragDebounce',
         'typeScrollbarHandleResizeTimeout',
-        'typeScrollbarThumbTop'
+        'typeScrollbarThumbLastTop',
+        'typeScrollbarDimensions'
       ]));
     }
 
@@ -280,7 +275,7 @@
 
       // Scroll to top
       else if (position === 'home') {
-        const shift = 1000;  // big shift to ensure real top
+        const shift = -1000;  // big shift to ensure real top
         this.bookPositionElement.setPosition([0, 0, shift]);
       }
 
@@ -291,18 +286,18 @@
         const lastElementIndex = lastFragment.active
           ? lastFragment.childElementCount - 1
           : lastFragment.children[0].content.childElementCount - 1;
-        const shift = -1000;  // big shift to ensure real bottom
+        const shift = 1000;  // big shift to ensure real bottom
         this.bookPositionElement.setPosition([lastFragmentIndex, lastElementIndex, shift]);
       }
 
       // Scroll page up
       else if (position === 'pageup') {
-        this.bookScrollElement.scrollBy(0, -0.9 * this.bookScrollElement.offsetHeight);
+        this.bookScrollElement.scrollBy(0, -0.875 * this.bookScrollElement.offsetHeight);
       }
 
       // Scroll page down
       else if (position === 'pagedown') {
-        this.bookScrollElement.scrollBy(0, 0.9 * this.bookScrollElement.offsetHeight);
+        this.bookScrollElement.scrollBy(0, 0.875 * this.bookScrollElement.offsetHeight);
       }
 
       // Bad position warn
@@ -477,7 +472,7 @@
           .scrollbar-thumb {
             position: absolute;
             width: 100%;
-            min-height: var(--book-scrollbar-thumb-min-height, 88px);
+            min-height: var(--book-scrollbar-thumb-min-height, 128px);
             right: 0px;
             top: 0px;
             border-radius: 4px;
@@ -527,85 +522,84 @@
       return this.typeScrollbarTrackElement.querySelector('.scrollbar-ruler');
     }
 
-    get typeScrollbarTrackRect () {
-      return this.getCached('typeScrollbarTrackRect', () => {
-        return this.typeScrollbarTrackElement.getBoundingClientRect();
-      }, 'type');
+    get typeScrollbarDimensions () {
+      return this.getCached('typeScrollbarDimensions', () => {
+        const trackElement = this.typeScrollbarTrackElement;
+        const thumbElement = this.typeScrollbarThumbElement;
+        const trackRect = trackElement.getBoundingClientRect(); // rect
+        const trackPoints = this.trackModel[this.trackModel.length - 1];
+        const pointHeight =  trackRect.height / trackPoints;
+        const thumbPoints = this.calculateScrollbarThumbPoints();
+        const thumbMinHeight = parseInt(getComputedStyle(thumbElement).minHeight, 10);
+        const thumbInitialHeight = thumbPoints.total * pointHeight;
+        const thumbHeight = Math.max(thumbMinHeight, thumbInitialHeight);
+
+        let trackTop = 0;
+        let trackHeight = trackRect.height;
+        if (thumbInitialHeight < thumbMinHeight) {
+          trackTop = (thumbMinHeight - thumbInitialHeight) * thumbPoints.ratioAbove;
+          trackHeight = trackHeight - (thumbMinHeight - thumbInitialHeight);
+        }
+        return {
+          track: {
+            rect: trackRect,
+            points: trackPoints,
+            top: trackTop,
+            height: trackHeight,
+            bottom: trackTop + trackHeight,
+            possibleTop: trackTop + (trackHeight * thumbPoints.above / trackPoints),
+            possibleBottom: trackTop + trackHeight - (trackHeight * thumbPoints.below / trackPoints)
+          },
+          thumb: {
+            points: thumbPoints,
+            minHeight: thumbMinHeight,
+            initialHeight: thumbInitialHeight,
+            height: thumbHeight,
+            isDistorted: thumbInitialHeight < thumbMinHeight
+          },
+          point: {
+            height: pointHeight
+          }
+        };
+      });
     }
 
-    get typeScrollbarTrackPoints () {
-      return this.trackModel[this.trackModel.length - 1];
-    }
-
-    get typeScrollbarThumbPoints () {
-      return this.getCached('typeScrollbarThumbPoints', () => {
-        return this.calculateScrollbarThumbPoints();
-      }, 'type');
-    }
-
-    get typeScrollbarThumbHeight () {
-      return this.getCached('typeScrollbarThumbHeight', () => {
-        const minHeight = parseInt(getComputedStyle(this.typeScrollbarThumbElement).minHeight, 10);
-        const pointHeight = this.typeScrollbarTrackRect.height / this.typeScrollbarTrackPoints;
-        const height = this.typeScrollbarThumbPoints.total * pointHeight;
-        this.setCached('typeScrollbarThumbInitialHeight', height);
-        this.setCached('typeScrollbarThumbMinHeight', minHeight);
-        this.setCached('typeScrollbarThumbIsDistorted', height < minHeight);
-        return Math.max(minHeight, height);
-      }, 'type');
+    get typeScrollbarThumbLastTop () {
+      return this.getCached('typeScrollbarThumbLastTop');
     }
 
     typeScrollbarHandleMousedown (event) {
       this.typeScrollbarDragInProgress = true;
       this.bookScrollElement.style.userSelect = 'none'; // prevent text selection during drag
       this.classList.add('scrollbar-drag');
-      this.setCached(
-        'typeScrollbarDragShiftY',
-        event.clientY - this.typeScrollbarThumbElement.getBoundingClientRect().top
-      );
+      this.setCached('typeScrollbarDragStart', {
+        clientY: event.clientY,
+        thumbTop: this.typeScrollbarThumbLastTop
+      });
     }
 
     typeScrollbarHandleMouseup () {
       this.typeScrollbarDragInProgress = false;
       this.bookScrollElement.style.userSelect = null; // restore text selection
       this.classList.remove('scrollbar-drag');
-      this.deleteCached([
-        'typeScrollbarDragShiftY',
-        'typeScrollbarDragClientY',
-        'typeScrollbarDragTop'
-      ]);
+      this.deleteCached('typeScrollbarDragStart');
     }
 
     typeScrollbarHandleMousemove (event) {
       if (this.typeScrollbarDragInProgress) {
-        // Move up or down depending on mouse move delta
-        let delta;
-        let top;
-        const dragShiftY = this.getCached('typeScrollbarDragShiftY');
-        const dragClientY = this.getCached('typeScrollbarDragClientY');
-        const dragTop = this.getCached('typeScrollbarDragTop');
-        if (dragClientY !== undefined && dragTop !== undefined) {
-          delta = event.clientY - dragClientY;
-          top = dragTop + delta;
-        } else {
-          const currentTop = this.typeScrollbarThumbElement.getBoundingClientRect().top;
-          delta = event.clientY - currentTop;
-          top = currentTop + delta;
-        }
-        this.setCached('typeScrollbarDragClientY', event.clientY);
+        const dragStart = this.getCached('typeScrollbarDragStart');
+        const dragDelta = dragStart.clientY - event.clientY;
 
-        // Truncate 'y' position, taking thumb shift relative to mouse pointer into account
-        let rect = this.typeScrollbarTrackRect;
-        let correction = dragShiftY + rect.top;
-        if (top - correction < 0) {
-          top = correction;
-        } else if (top - correction > rect.height - this.typeScrollbarThumbHeight) {
-          top = rect.height - this.typeScrollbarThumbHeight + correction;
-        }
-        this.setCached('typeScrollbarDragTop', top); // keep mouse position (not thumb position)
+        // Calc initial thumb position
+        let top = dragStart.thumbTop + event.clientY - dragStart.clientY;
 
-        // Render thumb position
-        this.renderScrollbar({thumb: {top: top - correction}});
+        // Stick to min-max positions
+        const info = this.typeScrollbarDimensions;
+        if (top < info.track.possibleTop) top = info.track.possibleTop;
+        else if (top > info.track.possibleBottom) top = info.track.possibleBottom;
+
+        // Render only position change
+        this.renderScrollbar({thumb: {top}});
 
         // Scroll book either with debounce or threshold
         if (this.getAttribute('drag-threshold')) {
@@ -628,11 +622,7 @@
     typeScrollbarHandleResize () {
       clearTimeout(this.getCached('typeScrollbarHandleResizeTimeout'));
       this.setCached('typeScrollbarHandleResizeTimeout', setTimeout(() => {
-        this.deleteCached([
-          'typeScrollbarTrackRect',
-          'typeScrollbarThumbPoints',
-          'typeScrollbarThumbHeight',
-        ]);
+        this.deleteCached('typeScrollbarDimensions');
         this.renderScrollbar(this.calculateScrollbarFromPosition(
           this.bookPositionElement.getPosition()
         ));
@@ -640,19 +630,8 @@
     }
 
     typeScrollbarHandleClick (event) {
-      // If clicked on scrollbar track, scroll page down/up,
-      // depending on click position relative to thumb
-      if (event.target === this.typeScrollbarTrackElement) {
-        if (this.scrollFaster === 'position') {
-          const trackTop = this.typeScrollbarTrackElement.getBoundingClientRect().top;
-          const offsetY = event.clientY - trackTop;
-          this.scrollTo(this.calculatePositionFromScrollbar(offsetY));
-        } else {
-          const thumbTop = this.typeScrollbarThumbElement.getBoundingClientRect().top;
-          const offsetDelta = event.clientY - thumbTop;
-          this.scrollTo(offsetDelta > 0 ? 'pagedown' : 'pageup');
-        }
-      }
+      const thumb = this.typeScrollbarThumbElement.getBoundingClientRect();
+      this.scrollTo(event.clientY > thumb.bottom ? 'pagedown' : 'pageup');
     }
 
     typeScrollbarHideNative (id) {
@@ -677,10 +656,17 @@
     }
 
     calculatePositionFromScrollbar (top) {
-      if (top === undefined) top = this.getCached('typeScrollbarThumbTop');
-      const relative = top / this.typeScrollbarTrackRect.height;
-      const points = relative * this.typeScrollbarTrackPoints;
-      const shift = -1 * (points % 1); // position[2]
+      top = top || this.typeScrollbarThumbLastTop;
+      const info = this.typeScrollbarDimensions;
+
+      // Detect home/end scrolls and early exit
+      if (top - info.track.possibleTop < 1) return 'home';
+      else if (info.track.possibleBottom - top < 1) return 'end';
+
+      // Calc regular scrolls
+      const relative = (top - info.track.top) / info.track.height;
+      const points = parseFloat((relative * info.track.points).toFixed(6));
+      const shift = points % 1; // position[2]
       let fragment = 0;
       while (this.trackModel[fragment] < points) fragment += 1;
       fragment = fragment ? fragment - 1 : 0; // position[0]
@@ -689,31 +675,14 @@
     }
 
     calculateScrollbarFromPosition (position) {
-      const trackPoints = this.typeScrollbarTrackPoints;
-      const thumbPoints = this.typeScrollbarThumbPoints;
-      const thumbHeight = this.typeScrollbarThumbHeight;
-      const currentPoint = this.trackModel[position[0]] + position[1];
-
-      let baseTop = 0;
-      let trackHeight = this.typeScrollbarTrackRect.height;
-      // If thumb size is distorted (intially too small, so we use min-height)
-      // correct track height and base top position.
-      if (this.getCached('typeScrollbarThumbIsDistorted')) {
-        let thumbMinHeight = this.getCached('typeScrollbarThumbMinHeight');
-        let thumbInitialHeight = this.getCached('typeScrollbarThumbInitialHeight');
-        let thumbDelta = thumbMinHeight - thumbInitialHeight;
-        baseTop = thumbDelta * thumbPoints.ratioAbove;
-        trackHeight = trackHeight - thumbDelta;
-      }
+      // Use saved dimensions info
+      const positionPoint = this.trackModel[position[0]] + position[1];
+      const info = this.typeScrollbarDimensions;
       return {
         thumb: {
-          height: thumbHeight,
-          top: baseTop + (trackHeight * currentPoint / trackPoints),
-          translateY: -1 * thumbHeight * thumbPoints.ratioAbove
-        },
-        track: {
-          baseTop: baseTop,
-          height: trackHeight
+          height: info.thumb.height,
+          top: info.track.top + (info.track.height * positionPoint / info.track.points),
+          translateY: -1 * info.thumb.height * info.thumb.points.ratioAbove
         }
       };
     }
@@ -779,7 +748,6 @@
         }
         return points;
       }
-
       const height = this.bookScrollElement.offsetHeight;
       const margin = this.bookPositionElement.margin;
       const above = calculatePoints(height, margin, 1);
@@ -787,17 +755,23 @@
       const total = above + below;
       const ratioAbove = above / total;
       const ratioBelow = below / total;
-      return { above, below, total, ratioAbove, ratioBelow };
+      return {
+        above,
+        below,
+        total,
+        ratioAbove,
+        ratioBelow
+      };
     }
 
-    renderScrollbar ({ thumb = {}, track = {} } = {}) {
+    renderScrollbar ({ thumb }) {
       const style = this.typeScrollbarThumbElement.style;
 
       if (thumb.height !== undefined) {
         style.height = `${thumb.height}px`;
       }
       if (thumb.top !== undefined) {
-        this.setCached('typeScrollbarThumbTop', thumb.top);
+        this.setCached('typeScrollbarThumbLastTop', thumb.top);
         style.top = `${thumb.top}px`
       }
       if (thumb.translateY !== undefined) {
@@ -807,13 +781,13 @@
       // Add track ruler if needed
       if (this.debug && !this.typeScrollbarRulerElement) {
         let t = document.createElement('template');
-        const points = this.typeScrollbarTrackPoints;
+        const { track } = this.typeScrollbarDimensions
         t.innerHTML = `
           <div class="scrollbar-ruler">
             ${
-              'x'.repeat(points + 1).split('').map((point, i) => {
+              'x'.repeat(track.points + 1).split('').map((point, i) => {
                 return '<div class="scrollbar-ruler-unit" style="top: '
-                  + (track.baseTop + i * (track.height / points))
+                  + (track.top + i * (track.height / track.points))
                   +'px"></div>';
               }).join('')
             }

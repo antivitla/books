@@ -36,7 +36,7 @@
     book-scroll {
       height: 85vh;
       position: relative;
-      top: 18px;
+      top: 28px;
       box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.6);
     }
   </style>
@@ -58,11 +58,11 @@
 
 <book-control for="hegel--nauka-logiki" type="url"></book-control>
 <book-control for="hegel--nauka-logiki" type="keyboard"></book-control>
-<book-control for="hegel--nauka-logiki" type="scrollbar" x-debug></book-control>
+<book-control for="hegel--nauka-logiki" type="scrollbar"></book-control>
 
 
 <!-- Position handler (required for controls) -->
-<book-position for="hegel--nauka-logiki" depth="2" margin="0.2" x-debug></book-position>
+<book-position for="hegel--nauka-logiki" depth="2" margin="0.2"></book-position>
 
 <script>
 $c = document.querySelector('book-control[type="scrollbar"]');
