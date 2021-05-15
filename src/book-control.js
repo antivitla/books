@@ -567,7 +567,6 @@
             right: 4px;
             bottom: 4px;
             width: 12px;
-            background-color: rgba(0, 0, 0, 0.05);
             border-radius: 4px;
           }
           .scrollbar-track {
