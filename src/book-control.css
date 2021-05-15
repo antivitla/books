@@ -1,0 +1,141 @@
+book-control {
+  font-family: "kazimirtext", serif;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: inherit;
+}
+
+/* Running */
+
+book-control[type="running"] {
+  text-align: center;
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: small;
+}
+
+book-control[type="running"] a {
+  text-decoration: none;
+  cursor: pointer;
+  color: inherit;
+  display: inline;
+}
+
+book-control[type="running"] header {
+  display: inline;
+}
+
+book-control[type="running"] .author:after,
+book-control[type="running"] .prefix:after {
+  content: ". ";
+}
+
+book-control[type="running"] .divider:before {
+  content: ' — '
+}
+
+book-control[type="running"] .divider.last {
+  display: none;
+}
+
+book-control[type="running"] a.last {
+  display: block;
+  font-family: Old Standard TT;
+  margin-top: 0.375rem;
+}
+
+book-control[type="running"] a.last .author:after,
+book-control[type="running"] a.last .prefix:after {
+  content: none;
+}
+
+
+book-control[type="running"] a.last .author,
+book-control[type="running"] a.last .prefix {
+  display: block;
+  font-size: 62.5%;
+  text-transform: uppercase;
+}
+
+book-control[type="running"] a.last .title {
+  display: block;
+  font-size: 112.5%;
+  font-weight: bold;
+}
+
+book-control[type="running"] a.last header {
+  display: block;
+  font-size: 1rem;
+}
+
+book-control[type="running"] a.last header[depth="1"],
+book-control[type="running"] a.last header[depth="2"],
+book-control[type="running"] a.last header[depth="3"] {
+  /* color: var(--book-text-highlight-color); */
+}
+
+/* Index */
+
+book-control[type="index"] a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: inline-block;
+}
+
+book-control[type="index"] ul {
+  padding: 0;
+  margin: 0 0 0 0.75rem;
+  font-size: 1rem;
+  font-family: Old Standard TT;
+}
+
+book-control[type="index"] ul ul {
+  /* font-size: 0.8rem; */
+}
+
+book-control[type="index"] ul ul ul {
+  /* font-size: 0.64rem; */
+}
+
+book-control[type="index"] li {
+  list-style: none;
+  margin: 0.375rem 0;
+}
+
+book-control[type="index"] .author,
+book-control[type="index"] .prefix,
+book-control[type="index"] .title {
+  display: block;
+}
+
+book-control[type="index"] .title {
+  line-height: 1.25;
+}
+
+book-control[type="index"] .author,
+book-control[type="index"] .prefix {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+book-control[type="index"] [depth="1"] .author + .title,
+book-control[type="index"] [depth="1"] .prefix + .title,
+book-control[type="index"] [depth="2"] .author + .title,
+book-control[type="index"] [depth="2"] .prefix + .title,
+book-control[type="index"] [depth="3"] .author + .title,
+book-control[type="index"] [depth="3"] .prefix + .title {
+  font-weight: bold;
+}
+
+book-control[type="index"] li:not(:first-child) > a header[depth="1"] {
+  margin-top: 2rem;
+}
+
+book-control[type="index"] li li li .title {
+  font-size: 0.8rem;
+}

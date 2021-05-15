@@ -24,7 +24,8 @@
 
     DEFAULT = {
       dragDebounce: 200,
-      dragThreshold: 200
+      dragThreshold: 200,
+      runningDepth: 2
     };
 
     // Properties
@@ -39,6 +40,10 @@
 
     get dragThreshold () {
       return parseInt(this.getAttribute('drag-threshold') || this.DEFAULT.dragThreshold, 10);
+    }
+
+    get runningDepth () {
+      return parseInt(this.getAttribute('running-depth') || this.DEFAULT.runningDepth, 10);
     }
 
     get debug () { return this.getBooleanAttribute('debug'); }
@@ -165,15 +170,22 @@
     controlTypeChangedCallback (type) {
       this.cleanup('type');
       switch (type) {
+        case 'index':
+          this.shadowRoot.innerHTML = this.typeIndexShadowHTML;
+          break;
+        case 'running':
+          this.shadowRoot.innerHTML = this.typeRunningShadowHTML;
+          break;
         case 'url':
-          this.shadowRoot.innerHTML = this.typeUrlShadowHTML; // change template
+          this.shadowRoot.innerHTML = this.typeUrlShadowHTML;
+          this.listen('hashchange', window, this.typUrlHandleHashchange, 'type');
           break;
         case 'keyboard':
-          this.shadowRoot.innerHTML = this.typeKeyboardShadowHTML; // change template
+          this.shadowRoot.innerHTML = this.typeKeyboardShadowHTML;
           this.listen('keyup', document, this.typeKeyboardHandleKeyup, 'type');
           break;
         case 'scrollbar':
-          this.shadowRoot.innerHTML = this.typeScrollbarShadowHTML; // change template
+          this.shadowRoot.innerHTML = this.typeScrollbarShadowHTML;
           if (this.for) this.typeScrollbarHideNative(this.for);
           this.listen('mousedown',
             this.typeScrollbarThumbElement, this.typeScrollbarHandleMousedown, 'type'
@@ -191,7 +203,13 @@
     }
 
     bookModelAvailableCallback () {
-      console.warn('Base method to override when book models are ready');
+      switch (this.controlType) {
+        case 'index':
+          this.renderIndexTree(this.indexTreeModel);
+          break;
+        default:
+          break;
+      }
     }
 
     bookStyledCallback () {
@@ -201,18 +219,25 @@
           if (position) this.scrollTo(position);
           this.typeUrlComplete = true;
           break;
+        case 'running':
+          let currentPosition = this.bookPositionElement.getPosition();
+          this.renderRunning(this.calculateRunningFromPosition(currentPosition));
+          break;
         default:
           break;
       }
     }
 
 
-    // Event handlers
+    // Position change (main) event handler
 
     handlePositionChange ({ detail: bookPosition, target }) {
       if (target === this.bookPositionElement) {
         this.setCached('bookPosition', bookPosition);
         switch (this.controlType) {
+          case 'running':
+            this.renderRunning(this.calculateRunningFromPosition(bookPosition));
+            break;
           case 'url':
             if (this.typeUrlComplete) {
               this.renderUrl(this.calculateUrlFromPosition(bookPosition));
@@ -230,7 +255,7 @@
     }
 
 
-    // Main scroll method
+    // Scroll (main) method
 
     scrollTo (position) {
       // Normally position is an array of indexes,
@@ -307,7 +332,7 @@
     }
 
 
-    // Calculated models and other expensive calculations
+    // Calculate models and other expensive stuff
 
     calculateTrackModel () {
       const trackModel = [0];
@@ -385,6 +410,83 @@
     }
 
 
+    // Type: index
+
+    get typeIndexShadowHTML () {
+      return `
+        <style>
+          :host([type="index"]) {
+            display: block;
+          }
+        </style>
+        <slot></slot>
+      `;
+    }
+
+    renderIndexTree (branch) {
+      this.innerHTML = `<ul>${
+        branch.children.map(child => this.indexBranchHTML(child)).join('')
+      }</ul>`;
+    }
+
+
+    // Type: running
+
+    get typeRunningShadowHTML () {
+      return `
+        <style>
+          :host([type="running"]) {
+            display: block;
+          }
+        </style>
+        <slot></slot>
+      `;
+    }
+
+    calculateRunningFromPosition (position) {
+      const breadcrumbs = [];
+      // Find closest header
+      let headerIndex = this.indexModel.findIndex((header, index) => {
+        let lowerBound = position[0] >= header.position[0] && position[1] >= header.position[1];
+        let upperBound = (
+          !this.indexModel[index + 1] ||
+          position[0] < this.indexModel[index + 1].position[0] ||
+          (
+            position[0] === this.indexModel[index + 1].position[0] &&
+            position[1] < this.indexModel[index + 1].position[1]
+          )
+        );
+        return lowerBound && upperBound;
+      });
+      breadcrumbs.push(this.indexModel[headerIndex]);
+      // Add ancestor headers
+      let depth = breadcrumbs[0].depth;
+      while (depth > 0 && headerIndex > 0) {
+        headerIndex -= 1;
+        if (this.indexModel[headerIndex].depth < breadcrumbs[breadcrumbs.length - 1].depth) {
+          breadcrumbs.push(this.indexModel[headerIndex]);
+          depth -= 1;
+        }
+      }
+      return breadcrumbs.reverse();
+    }
+
+    renderRunning (breadcrumbs) {
+      this.innerHTML = breadcrumbs
+        .slice(0, this.runningDepth)
+        .map(header => this.headerLinkHTML(header))
+        .join(this.headerDividerHTML());
+      // Set helper classes
+      const dividers = this.querySelectorAll('.divider');
+      if (dividers.length) {
+        Array.prototype.slice.call(dividers, -1)[0].classList.add('last');
+      }
+      if (breadcrumbs.length) {
+        Array.prototype.slice.call(this.querySelectorAll('a'), -1)[0].classList.add('last');
+      }
+    }
+
+
     // Type: url
 
     typeUrlComplete = false;
@@ -399,8 +501,14 @@
       `;
     }
 
-    calculatePositionFromUrl () {
-      let url = new URL(location.href);
+    typUrlHandleHashchange (event) {
+      if (this.typeUrlComplete) {
+        this.scrollTo(this.calculatePositionFromUrl());
+      }
+    }
+
+    calculatePositionFromUrl (url) {
+      url = url || new URL(location.href);
       let hash = url.hash.replace(/^#/, '');
       if (hash) {
         let t = new URL(url.origin);
@@ -830,6 +938,31 @@
         else if (float === int) return int;
         else return float;
       });
+    }
+
+    headerDividerHTML () {
+      return '<span class="divider"></span>';
+    }
+
+    headerLinkHTML (model) {
+      return `<a href="#?position=${model.position.join(',')}">${this.headerHTML(model)}</a>`;
+    }
+
+    headerHTML (model) {
+      const prefix = () => model.prefix ? `<span class="prefix">${model.prefix}</span>` : '';
+      const author = () => model.author ? `<span class="author">${model.author}</span>` : '';
+      const title = () => `<span class="title">${model.title}</span>`;
+      return `<header depth="${model.depth}">${author() || prefix()}${title()}</header>`;
+    }
+
+    indexBranchHTML (branch) {
+      if (!branch.children || !branch.children.length) {
+        return `<li>${this.headerLinkHTML(branch)}</li>`;
+      } else {
+        return `<li>${this.headerLinkHTML(branch)}<ul>${
+          branch.children.map(child => this.indexBranchHTML(child)).join('')
+        }</ul></li>`;
+      }
     }
   }
 

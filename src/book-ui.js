@@ -4,7 +4,7 @@
       if (event.target.closest('.book-index-toggle')) {
         bookIndex.classList.toggle('active');
       } else if (
-        event.target.closest('.book-index book-scroll-control') ||
+        event.target.closest('.book-index book-control') ||
         !event.target.closest('.book-index')
       ) {
         bookIndex.classList.remove('active');
@@ -12,12 +12,9 @@
     });
   }
 
-  var bookHeader = {
-    activateTimeout: 300
-  };
-
   function setupBookHeaderPanel (bookHeader, bookScroll) {
     let scrollTop = bookScroll.scrollTop;
+    // Show/hide on scroll up/down
     bookScroll.addEventListener('scroll', event => {
       if (event.target.scrollTop < 50) {
         bookHeader.classList.remove('active');
@@ -25,20 +22,19 @@
       }
       let delta = bookScroll.scrollTop - scrollTop;
       scrollTop = scrollTop + delta;
-      if (delta < 0) {
-        clearTimeout(bookHeader.activateTimeoutId);
-        bookHeader.activateTimeoutId = setTimeout(() => {
-          bookHeader.classList.add('active');
-        }, bookHeader.activateTimeout)
-      } else if (delta > 0){
+      if (delta < -5) {
+        bookHeader.classList.add('active');
+      } else if (delta > 5) {
         bookHeader.classList.remove('active');
       }
     });
+    // Hide on click on nav
     bookHeader.addEventListener('click', event => {
       setTimeout(() => {
         bookHeader.classList.remove('active');
       }, 150);
     });
+    // Hide on click outside
     document.addEventListener('click', event => {
       if (event.target.closest('.book-scroll')) {
         bookHeader.classList.toggle('active');
@@ -51,7 +47,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     const bookIndex = document.querySelector('.book-index');
     if (bookIndex) setupBookIndexPanel(bookIndex);
-
     const bookHeader = document.querySelector('.book-header');
     const bookScroll = document.querySelector('.book-scroll');
     if (bookHeader && bookScroll) setupBookHeaderPanel(bookHeader, bookScroll);

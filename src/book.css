@@ -44,11 +44,6 @@ body {
   margin-right: auto;
 }
 
-/* .book em {
-  font-family: Merriweather;
-  font-size: 87.5%;
-} */
-
 .book strong {
   font-weight: 600;
 }
@@ -215,7 +210,6 @@ body {
 .book header h2 ~ p {
   margin-bottom: -0.75rem;
   font-size: calc(2.125rem / 3 + 0.5rem);
-  /*color: #B35E54;*/
 }
 
 .book header h2 + .prefix {
@@ -365,117 +359,4 @@ body {
   align-items: center;
   border-right: double 4px;
   text-indent: 0;
-}
-
-/* Book Index */
-
-.book-index {
-  font-family: "Old Standard TT", "Times New Roman", serif;
-  font-size: 1rem;
-  line-height: 1.5;
-  background-color: var(--book-background-light-color);
-
-  box-shadow: 4px 0px 16px 0px rgba(0, 0, 0, 0.125);
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  overflow: auto;
-  width: 100%;
-  padding: 1rem;
-  box-sizing: border-box;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-out;
-  z-index: 10;
-
-  -ms-overflow-style: 12px;
-  scrollbar-width: 12px;
-}
-
-.book-index::-webkit-scrollbar {
-  width: 20px;
-  background-color: transparent;
-}
-
-.book-index::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.6);
-  border-radius: 9px;
-  border: solid var(--book-background-light-color) 4px;
-}
-
-.book-index.active {
-  transform: translateX(0%);
-}
-
-@media (min-width: 576px) {
-  .book-index {
-    max-width: 480px;
-  }
-}
-
-.book-index .book-index-toggle {
-  width: 24px;
-  height: 24px;
-  padding: 12px;
-  display: block;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  margin-top: -12px;
-  margin-left: -12px;
-}
-
-.book-index .book-index-toggle svg {
-  width: 24px;
-  height: 24px;
-  display: block;
-}
-
-/* Book Header */
-
-.book-header {
-  font-family: "Old Standard TT", "Times New Roman", serif;
-  font-size: 1rem;
-  line-height: 1.5;
-  background-color: var(--book-background-light-color);
-
-  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.125);
-  position: fixed;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  min-height: 3.5rem;
-  box-sizing: border-box;
-  padding: 1rem calc(48px + 2rem);
-  transform: translateY(-100%);
-  transition: transform 0.3s ease-out;
-  z-index: 10;
-}
-
-.book-header.active {
-  transform: translate(0%);
-}
-
-.book-header book-scroll-control[type="running"] {
-  max-width: 41rem;
-  margin: 0 auto;
-}
-
-.book-header .book-index-toggle {
-  width: 42px;
-  height: 42px;
-  display: block;
-  position: absolute;
-  left: 1rem;
-  top: calc(50% - 20px);
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 32px;
-  line-height: 42px;
-  text-align: center;
-}
-
-.book-header .book-index-toggle svg {
-  width: 32px;
-  height: 32px;
-  display: block;
 }

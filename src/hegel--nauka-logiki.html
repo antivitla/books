@@ -5,9 +5,12 @@
   <title>Наука логики. Гегель</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap'">
-  <link rel="stylesheet" href="https://use.typekit.net/nml1xlk.css">
-  <link rel="stylesheet" href="book.css" >
+  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap'" rel="stylesheet">
+  <link href="https://use.typekit.net/nml1xlk.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="book.css" rel="stylesheet">
+  <link href="book-ui.css" rel="stylesheet">
+  <link href="book-control.css" rel="stylesheet">
 
   <script src="binary-search.js"></script>
   <script src="book-element.js"></script>
@@ -16,6 +19,7 @@
   <script src="book-position.js"></script>
   <script src="book-control.js"></script>
   <script src="book-ui.js"></script>
+
   <!-- Preload fonts -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -32,45 +36,27 @@
     });
   </script>
 
-  <!-- Debug -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      window.book = {
-        c: document.querySelector('book-control[type="scrollbar"]'),
-        p: document.querySelector('book-position'),
-        s: document.querySelector('book-scroll')
-      }
-    });
-  </script>
-
-  <style>
-    book-scroll {
-      height: 85vh;
-      position: relative;
-      top: 28px;
-      box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.6);
-    }
-  </style>
 </head>
 <body>
-<!-- <nav class="book-header">
-  <div class="book-index-toggle">&equiv;</div>
-  <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="4"></book-scroll-control>
-  <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="4"></book-scroll-control>
-  <book-scroll-control for="hegel--nauka-logiki" type="running" running-depth="3"></book-scroll-control>
-</nav> -->
 
-<!-- <aside class="book-index">
-  <book-scroll-control for="hegel--nauka-logiki" type="index" index-collapse-depth="2, 3"></book-scroll-control>
-  <book-scroll-control for="hegel--nauka-logiki" type="index" index-collapse-depth="4"></book-scroll-control>
-</aside>-->
+<!-- Heavy UI book controls: sticky header with breadcrumbs and side-slide panel with index -->
+<nav class="book-header" theme="light">
+  <button class="book-action material-icons book-action-left book-index-toggle">toc</button>
+  <book-control for="hegel--nauka-logiki" type="running" running-depth="3"></book-control>
+</nav>
+<aside class="book-index" theme="light">
+  <book-control for="hegel--nauka-logiki" type="index"></book-control>
+</aside>
 
-<book-control for="hegel--nauka-logiki" type="url"></book-control>
-<book-control for="hegel--nauka-logiki" type="keyboard"></book-control>
+<!-- Other book controls (url, keyboard, scrollbar) -->
 <book-control for="hegel--nauka-logiki" type="scrollbar"></book-control>
+<book-control for="hegel--nauka-logiki" type="keyboard"></book-control>
+<book-control for="hegel--nauka-logiki" type="url"></book-control>
 
+<!-- Control/Emit reading position in book -->
 <book-position for="hegel--nauka-logiki" depth="2" margin="0.2"></book-position>
 
+<!-- Book content -->
 <book-scroll id="hegel--nauka-logiki" class="book-scroll" activation-margin="3000">
   <book-fragment class="book" src="hegel--nauka-logiki/cover.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/k-voprosu-o-dialektike.html" src-selector="section > *"></book-fragment>
