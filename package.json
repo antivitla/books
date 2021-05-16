@@ -1,11 +1,11 @@
 {
   "name": "books",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest src\/.+\\.test\\.js$",
-    "test:dev": "jest src\/.+\\.test\\.js$ --watch",
+    "test": "jest src/.+\\.test\\.js$",
+    "test:dev": "jest src/.+\\.test\\.js$ --watch",
     "test:e2e": "cypress open",
     "jest:raw": "jest",
     "cypress:raw": "cypress"
