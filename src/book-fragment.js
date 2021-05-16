@@ -89,6 +89,16 @@
               ...templateElement.content.querySelectorAll(selector)
             );
           }
+          // Setup additional styling capabilities for section/chapter/book headers
+          Array.prototype.forEach.call(
+            templateElement.content.querySelectorAll('header'),
+            header => {
+              const innerHeader = header.querySelector('h1,h2,h3,h4,h5,h6');
+              if (innerHeader) {
+                header.setAttribute('depth', innerHeader.tagName.charAt(1));
+              }
+            }
+          );
           // Now we should just insert content. If we are inactive, insert as a <template>
           this.replaceChildren(this.active ? templateElement.content : templateElement);
         }).catch(error => {

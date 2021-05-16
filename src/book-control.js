@@ -150,10 +150,10 @@
           // book is not expected to change, this might be calculated only once per book
           ['track', 'index', 'indexTree'].forEach(name => {
             let model;
-            const key = `${this.for}--${name}`;
+            const key = `${this.for}--${name}-model`;
             if (!localStorage.getItem(key)) {
               model = this[`calculate${name.replace(/^./, name.charAt(0).toUpperCase())}Model`]();
-              // localStorage.setItem(key, JSON.stringify(model));
+              localStorage.setItem(key, JSON.stringify(model));
             } else {
               model = JSON.parse(localStorage.getItem(key));
             }
@@ -235,6 +235,9 @@
       if (target === this.bookPositionElement) {
         this.setCached('bookPosition', bookPosition);
         switch (this.controlType) {
+          case 'index':
+            this.renderPositionInIndex(bookPosition);
+            break;
           case 'running':
             this.renderRunning(this.calculateRunningFromPosition(bookPosition));
             break;
@@ -429,6 +432,32 @@
       }</ul>`;
     }
 
+    renderPositionInIndex (position) {
+      const closestHeader = this.indexModel.find((header, index, model) => {
+        if (index === model.length - 1) {
+          return true;
+        }
+        const biggerThenCurrent = (
+          position[0] > header.position[0] ||
+          (
+            position[0] === header.position[0] &&
+            position[1] >= header.position[1]
+          )
+        );
+        const lowerThenNext = (
+          position[0] < model[index + 1].position[0] ||
+          (
+            position[0] === model[index + 1].position[0] &&
+            position[1] < model[index + 1].position[1]
+          )
+        );
+        return biggerThenCurrent && lowerThenNext;
+      });
+      const selector = `header[position="${closestHeader.position.join(',')}"]`;
+      this.querySelector('header.active')?.classList.remove('active');
+      this.querySelector(selector)?.classList.add('active');
+    }
+
 
     // Type: running
 
@@ -584,7 +613,7 @@
             top: 0px;
             border-radius: 4px;
             cursor: pointer;
-            background-color: rgba(0, 0, 0, 0.625);
+            background-color: var(--book-fill-color);
             user-select: none;
           }
           :host([type="scrollbar"]:hover),
@@ -951,7 +980,7 @@
       const prefix = () => model.prefix ? `<span class="prefix">${model.prefix}</span>` : '';
       const author = () => model.author ? `<span class="author">${model.author}</span>` : '';
       const title = () => `<span class="title">${model.title}</span>`;
-      return `<header depth="${model.depth}">${author() || prefix()}${title()}</header>`;
+      return `<header depth="${model.depth}" position="${model.position.join(',')}">${author() || prefix()}${title()}</header>`;
     }
 
     indexBranchHTML (branch) {

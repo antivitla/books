@@ -40,11 +40,11 @@
 <body>
 
 <!-- Heavy UI book controls: sticky header with breadcrumbs and side-slide panel with index -->
-<nav class="book-header" theme="light">
+<nav class="book-running-panel" theme="light">
   <button class="book-action material-icons book-action-left book-index-toggle">toc</button>
   <book-control for="hegel--nauka-logiki" type="running" running-depth="3"></book-control>
 </nav>
-<aside class="book-index" theme="light">
+<aside class="book-index-panel" theme="light">
   <book-control for="hegel--nauka-logiki" type="index"></book-control>
 </aside>
 
@@ -54,7 +54,7 @@
 <book-control for="hegel--nauka-logiki" type="url"></book-control>
 
 <!-- Control/Emit reading position in book -->
-<book-position for="hegel--nauka-logiki" depth="2" margin="0.2"></book-position>
+<book-position for="hegel--nauka-logiki" depth="2" margin="0.1"></book-position>
 
 <!-- Book content -->
 <book-scroll id="hegel--nauka-logiki" class="book-scroll" activation-margin="3000">

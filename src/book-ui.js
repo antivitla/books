@@ -9,46 +9,62 @@
       ) {
         bookIndex.classList.remove('active');
       }
+      // Do not toggle book running nav header, if we clicked on book index
+      if (event.target.closest('book-control')) {
+        let runningPanel = document.querySelector('.book-running-panel');
+        if (runningPanel) {
+          runningPanel.ignoreActivation = true;
+          setTimeout(() => {
+            delete runningPanel.ignoreActivation;
+          }, 500);
+        }
+      }
     });
   }
 
-  function setupBookHeaderPanel (bookHeader, bookScroll) {
+  function setupBookRunningPanel (bookRunning, bookScroll) {
     let scrollTop = bookScroll.scrollTop;
     // Show/hide on scroll up/down
     bookScroll.addEventListener('scroll', event => {
+      if (bookRunning.ignoreActivation) {
+        return;
+      }
       if (event.target.scrollTop < 50) {
-        bookHeader.classList.remove('active');
+        bookRunning.classList.remove('active');
         return;
       }
       let delta = bookScroll.scrollTop - scrollTop;
       scrollTop = scrollTop + delta;
       if (delta < -5) {
-        bookHeader.classList.add('active');
+        bookRunning.classList.add('active');
       } else if (delta > 5) {
-        bookHeader.classList.remove('active');
+        bookRunning.classList.remove('active');
       }
     });
     // Hide on click on nav
-    bookHeader.addEventListener('click', event => {
+    bookRunning.addEventListener('click', event => {
       setTimeout(() => {
-        bookHeader.classList.remove('active');
+        bookRunning.classList.remove('active');
       }, 150);
     });
     // Hide on click outside
     document.addEventListener('click', event => {
+      if (bookRunning.ignoreActivation) {
+        return;
+      }
       if (event.target.closest('.book-scroll')) {
-        bookHeader.classList.toggle('active');
+        bookRunning.classList.toggle('active');
       } else if (!event.target.closest('.book-header')) {
-        bookHeader.classList.remove('active');
+        bookRunning.classList.remove('active');
       }
     });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const bookIndex = document.querySelector('.book-index');
+    const bookIndex = document.querySelector('.book-index-panel');
     if (bookIndex) setupBookIndexPanel(bookIndex);
-    const bookHeader = document.querySelector('.book-header');
+    const bookRunning = document.querySelector('.book-running-panel');
     const bookScroll = document.querySelector('.book-scroll');
-    if (bookHeader && bookScroll) setupBookHeaderPanel(bookHeader, bookScroll);
+    if (bookRunning && bookScroll) setupBookRunningPanel(bookRunning, bookScroll);
   });
 }());

@@ -156,9 +156,13 @@
       }
       // Add relative top margin of the target element
       const rect = container.getBoundingClientRect();
-      position.push(rect.height ? ((this.scrollElementRect.top - rect.top) / rect.height) : 0);
+      position.push(
+        rect.height
+          ? -1 * (rect.top - this.scrollElementRect.top - margin) / rect.height
+          : 0
+        );
       // Element's position in DOM is an array of indexes,
-      // and last item in array is always it's top margin relative to viewport:
+      // and last item in array is it's top margin relative to visibility margin:
       // [1, 2, -1.456788]
       return position;
     }
