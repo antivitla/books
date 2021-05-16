@@ -46,7 +46,7 @@ book-control[type="running"] .divider.last {
 
 book-control[type="running"] a.last {
   display: block;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
 }
 
 book-control[type="running"] a.last header {
