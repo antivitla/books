@@ -52,18 +52,6 @@ html {
   --book-panel-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.6);
 }
 
-[theme="red"] {
-  --book-text-highlight-color: white;
-  --book-text-color: rgba(255, 255, 255, var(--book-high-emphasis));
-  --book-text-muted-color: rgba(255, 255, 255, var(--book-medium-emphasis));
-  --book-text-disabled-color: rgba(255, 255, 255, var(--book-low-emphasis));
-  --book-text-invert-color: rgba(0, 0, 0, var(--book-high-emphasis));
-  --book-background-color: var(--book-red-color);
-  --book-fill-color: rgba(255, 255, 255, var(--book-medium-emphasis));
-  --book-fill-muted-color: rgba(255, 255, 255, var(--book-low-emphasis));
-  --book-panel-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.6);
-}
-
 html, body {
   font-size: 16px;
   margin: 0;
