@@ -25,6 +25,7 @@
   class HTMLBookFragmentElement extends HTMLBookElement {
     constructor () {
       super();
+      this.attachShadow({ mode: 'open' });
       this.shadowRoot.innerHTML = `
         <style>
           :host {

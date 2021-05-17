@@ -4,60 +4,22 @@
   <meta charset="utf-8">
   <title>Наука логики. Гегель</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap'" rel="stylesheet">
-  <link href="https://use.typekit.net/nml1xlk.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <!-- Preload fonts -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const fonts = ['kazimirtext', 'Old Standard TT'];
-      const preloadFonts = document.createElement('template');
-      preloadFonts.innerHTML = `
-        <div style="position: fixed; z-index: -1; pointer-events: none; visibility: hidden">
-          ${'x'.repeat(fonts.length).split('').map((x, index) => {
-            return '<div style="font-family: ' + fonts[index] + '">&nbsp; Hey</div>';
-          }).join('')}
-        </div>
-      `;
-      document.body.append(preloadFonts.content.cloneNode(true));
-    });
-  </script>
-
-  <link href="book.css" rel="stylesheet">
-  <link href="book-ui.css" rel="stylesheet">
-  <link href="book-control.css" rel="stylesheet">
-
-  <script src="binary-search.js"></script>
-  <script src="book-element.js"></script>
-  <script src="book-fragment.js"></script>
-  <script src="book-scroll.js"></script>
-  <script src="book-position.js"></script>
-  <script src="book-control.js"></script>
-  <script src="book-ui.js"></script>
-
+  <link href="assets/fonts/material-icons.css" rel="stylesheet">
+  <link href="assets/fonts/kazimir-text.css" rel="stylesheet">
+  <link href="assets/fonts/old-standard.css" rel="stylesheet">
+  <link href="assets/book-control.css" rel="stylesheet">
+  <link href="assets/book-reader.css" rel="stylesheet">
+  <link href="assets/book.css" rel="stylesheet">
+  <script src="assets/binary-search.js"></script>
+  <script src="assets/book-element.js"></script>
+  <script src="assets/book-fragment.js"></script>
+  <script src="assets/book-position.js"></script>
+  <script src="assets/book-control.js"></script>
+  <script src="assets/book-scroll.js"></script>
+  <script src="assets/book-reader.js"></script>
 </head>
 <body>
-
-<!-- Heavy UI book controls: sticky header with breadcrumbs and side-slide panel with index -->
-<nav class="book-running-panel" theme="light">
-  <button class="book-action material-icons book-action-left book-index-toggle">toc</button>
-  <book-control for="hegel--nauka-logiki" type="running" running-depth="3"></book-control>
-</nav>
-<aside class="book-index-panel" theme="light">
-  <book-control for="hegel--nauka-logiki" type="index"></book-control>
-</aside>
-
-<!-- Other book controls (url, keyboard, scrollbar) -->
-<book-control for="hegel--nauka-logiki" type="scrollbar"></book-control>
-<book-control for="hegel--nauka-logiki" type="keyboard"></book-control>
-<book-control for="hegel--nauka-logiki" type="url"></book-control>
-
-<!-- Control/Emit reading position in book -->
-<book-position for="hegel--nauka-logiki" depth="2" margin="0.1"></book-position>
-
-<!-- Book content -->
-<book-scroll id="hegel--nauka-logiki" class="book-scroll" activation-margin="3000">
+<book-scroll id="hegel--nauka-logiki">
   <book-fragment class="book" src="hegel--nauka-logiki/cover.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/k-voprosu-o-dialektike.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/predislovie-k-pervomu-izdaniyu.html" src-selector="section > *"></book-fragment>
@@ -96,6 +58,6 @@
   <book-fragment class="book" src="hegel--nauka-logiki/kniga-3--otdel-3--absolyutnaya-ideya.html" src-selector="section > *"></book-fragment>
   <book-fragment class="book" src="hegel--nauka-logiki/o-logike-gegelya.html" src-selector="section > *"></book-fragment>
 </book-scroll>
-
+<book-reader for="hegel--nauka-logiki"></book-reader>
 </body>
 </html>

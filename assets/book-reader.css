@@ -1,6 +1,10 @@
+book-reader {
+  display: block;
+}
+
 /* Action */
 
-.book-action {
+book-reader .book-action {
   background: none;
   background-color: transparent;
   border: none;
@@ -12,7 +16,7 @@
   position: absolute;
 }
 
-.book-action.material-icons {
+book-reader .book-action.material-icons {
   width: 48px;
   height: 48px;
   line-height: 48px;
@@ -21,25 +25,25 @@
   border-radius: 50%;
 }
 
-.book-action.material-icons:hover {
+book-reader .book-action.material-icons:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-.book-action-left.material-icons {
+book-reader .book-action-left.material-icons {
   left: 1rem;
   top: 50%;
   transform: translateY(-24px);
 }
 
-.book-action-right {
+book-reader .book-action-right {
   right: 1rem;
   top: 50%;
   transform: translateY(-24px);
 }
 
-/* Nav */
+/* Running */
 
-.book-running-panel {
+book-reader .book-running-panel {
   background-color: var(--book-background-color);
   color: var(--book-text-color);
   position: fixed;
@@ -54,19 +58,18 @@
   z-index: 10;
 }
 
-.book-running-panel.active {
+book-reader .book-running-panel.active {
   transform: translate(0%);
   box-shadow: var(--book-panel-shadow);
 }
 
 /* Index */
 
-.book-index-panel {
+book-reader .book-index-panel {
   background-color: var(--book-background-color);
   color: var(--book-text-color);
   font-size: 1rem;
   line-height: 1.5;
-
   position: fixed;
   left: 0;
   top: 0;
@@ -82,24 +85,24 @@
   scrollbar-width: 12px;
 }
 
-.book-index-panel::-webkit-scrollbar {
+book-reader .book-index-panel::-webkit-scrollbar {
   width: 20px;
   background-color: transparent;
 }
 
-.book-index-panel::-webkit-scrollbar-thumb {
+book-reader .book-index-panel::-webkit-scrollbar-thumb {
   border-radius: 7px;
   background-color: var(--book-fill-color);
   border: solid var(--book-background-color) 4px;
 }
 
-.book-index-panel.active {
+book-reader .book-index-panel.active {
   transform: translateX(0%);
   box-shadow: var(--book-panel-shadow);
 }
 
 @media (min-width: 576px) {
-  .book-index-panel {
+  book-reader .book-index-panel {
     max-width: 480px;
   }
 }

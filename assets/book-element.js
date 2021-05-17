@@ -20,10 +20,20 @@
   class HTMLBookElement extends HTMLElement {
     constructor () {
       super();
-      this.attachShadow({ mode: 'open' });
     }
 
     cleanupTasks = [];
+    hasConnected = false;
+
+    connectedCallback () {
+      setTimeout(() => {
+        this.hasConnected = true;
+      });
+    }
+
+    disconnectedCallback () {
+      this.hasConnected = false;
+    }
 
     listen (event, target, callback, group) {
       const callbackBinded = callback.bind(this);
@@ -110,9 +120,7 @@
         const check = () => {
           if (document.readyState === 'complete') {
             document.removeEventListener('readystatechange', check);
-            setTimeout(() => {
-              resolve();
-            }, 300);
+            resolve();
             return true;
           }
         };

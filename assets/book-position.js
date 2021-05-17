@@ -29,6 +29,7 @@
   class HTMLBookPositionElement extends HTMLBookElement {
     constructor() {
       super();
+      this.attachShadow({ mode: 'open' });
       this.shadowRoot.innerHTML = `
         <style>
           :host {
@@ -86,16 +87,18 @@
     }
 
     attributeChangedCallback (name, previousValue, value) {
-      if (name === 'for' && value && value !== previousValue && this.isConnected) {
+      if (name === 'for' && value && value !== previousValue && this.hasConnected) {
         this.bookReferenceChangedCallback(value);
       }
     }
 
     connectedCallback () {
+      super.connectedCallback();
       if (this.for) this.bookReferenceChangedCallback(this.for);
     }
 
     disconnectedCallback () {
+      super.disconnectedCallback();
       this.cleanup();
     }
 
@@ -154,6 +157,8 @@
           break;
         }
       }
+      // Normalize to [0, 0] if book scroll is hidden
+      while(position.length < this.depth) position.push(0);
       // Add relative top margin of the target element
       const rect = container.getBoundingClientRect();
       position.push(

@@ -20,6 +20,7 @@
   class HTMLBookControlElement extends HTMLBookElement {
     constructor () {
       super();
+      this.attachShadow({ mode: 'open' });
     }
 
     DEFAULT = {
@@ -85,7 +86,7 @@
     static get observedAttributes () { return ['for', 'type']; }
 
     attributeChangedCallback (name, previousValue, value) {
-      if (value !== previousValue && this.isConnected) {
+      if (value !== previousValue && this.hasConnected) {
         switch (name) {
           case 'for':
             this.bookReferenceChangedCallback(value);
@@ -100,6 +101,7 @@
     }
 
     connectedCallback () {
+      super.connectedCallback();
       this.listen('change', document, this.handlePositionChange);
       if (this.for) this.bookReferenceChangedCallback(this.for);
       if (this.controlType) this.controlTypeChangedCallback(this.controlType);
@@ -121,6 +123,7 @@
     }
 
     disconnectedCallback () {
+      super.disconnectedCallback();
       this.cleanup();
     }
 

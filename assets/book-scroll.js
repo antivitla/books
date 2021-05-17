@@ -21,6 +21,7 @@
 
     constructor () {
       super();
+      this.attachShadow({ mode: 'open' });
       this.shadowRoot.innerHTML = `
         <style>
           :host {
@@ -65,12 +66,18 @@
     }
 
     attributeChangedCallback (name, previousValue, value) {
-      if (name === 'activation-margin' && value !== previousValue) {
+      if (name === 'activation-margin' && previousValue !== value && this.hasConnected) {
         this.setupCallback();
       }
     }
 
+    connectedCallback () {
+      super.connectedCallback();
+      this.setupCallback();
+    }
+
     disconnectedCallback () {
+      super.disconnectedCallback();
       this.cleanup();
     }
 

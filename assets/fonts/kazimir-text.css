@@ -1,0 +1,39 @@
+@font-face {
+  font-family: "Kazimir Text";
+  src:url("kazimir-text-italic.woff2") format("woff2"),
+      url("kazimir-text-italic.woff") format("woff"),
+      url("kazimir-text-italic.otf") format("opentype");
+  font-display: swap;
+  font-style: italic;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Kazimir Text";
+  src: url("kazimir-text-normal.woff2") format("woff2"),
+      url("kazimir-text-normal.woff") format("woff"),
+      url("kazimir-text-normal.otf") format("opentype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Kazimir Text";
+  src: url("kazimir-text-bold.woff2") format("woff2"),
+      url("kazimir-text-bold.woff") format("woff"),
+      url("kazimir-text-bold.otf") format("opentype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "Kazimir Text";
+  src: url("kazimir-text-bold-italic.woff2") format("woff2"),
+    url("kazimir-text-bold-italic.woff") format("woff"),
+    url("kazimir-text-bold-italic.otf") format("opentype");
+  font-display: swap;
+  font-style: italic;
+  font-weight: bold;
+}
