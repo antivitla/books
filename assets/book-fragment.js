@@ -94,7 +94,7 @@
           Array.prototype.forEach.call(
             templateElement.content.querySelectorAll('header'),
             header => {
-              const innerHeader = header.querySelector('h1,h2,h3,h4,h5,h6');
+              const innerHeader = header.querySelector('h1,h2,h3,h4,h5,h6,h7,h8,h9');
               if (innerHeader) {
                 header.setAttribute('depth', innerHeader.tagName.charAt(1));
               }

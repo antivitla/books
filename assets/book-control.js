@@ -156,7 +156,7 @@
             const key = `${this.for}--${name}-model`;
             if (!localStorage.getItem(key)) {
               model = this[`calculate${name.replace(/^./, name.charAt(0).toUpperCase())}Model`]();
-              localStorage.setItem(key, JSON.stringify(model));
+              // localStorage.setItem(key, JSON.stringify(model));
             } else {
               model = JSON.parse(localStorage.getItem(key));
             }
@@ -285,7 +285,7 @@
 
         // If at bottom, use scrollTo('bottom') to have precise auto-shift
         if (
-          position[0] === model.length - 2 &&
+          position[0] === model[model.length - 2] &&
           position[1] >= model[model.length - 2] - model[model.length - 3]
         ) {
           this.scrollTo('end');
@@ -359,7 +359,7 @@
           const fragment = child.active ? child : child.children[0].content;
           const fragmentActive = child.active;
           const fragmentIndex = childIndex;
-          Array.prototype.forEach.call(fragment.querySelectorAll('h1,h2,h3,h4,h5,h6'), header => {
+          Array.prototype.forEach.call(fragment.querySelectorAll('h1,h2,h3,h4,h5,h6,h7,h8,h9'), header => {
             let headerParent = header;
             while (fragmentActive
               ? headerParent.parentElement !== fragment
