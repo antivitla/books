@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>[Название книги]. [Автор книги]</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="assets/book-control.css" rel="stylesheet">
+  <link href="assets/book-reader.css" rel="stylesheet">
+  <link href="assets/book.css" rel="stylesheet">
+  <script src="assets/binary-search.js"></script>
+  <script src="assets/book-element.js"></script>
+  <script src="assets/book-fragment.js"></script>
+  <script src="assets/book-position.js"></script>
+  <script src="assets/book-control.js"></script>
+  <script src="assets/book-scroll.js"></script>
+  <script src="assets/book-reader.js"></script>
+</head>
+<body>
+<book-scroll id="book-id">
+  <book-fragment class="book" src="book/fragment.html" selector="section > *"></book-fragment>
+</book-scroll>
+<book-reader for="book-id"></book-reader>
+</body>
+</html>

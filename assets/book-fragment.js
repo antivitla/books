@@ -83,8 +83,8 @@
           const contentHTML = html.split(/<body[^>]*>/).slice(-1)[0].split('</body>')[0];
           const templateElement = document.createElement('template');
           templateElement.innerHTML = contentHTML;
-          // If a 'src-selector' is set, we want more specific elements inside.
-          const selector = this.getAttribute('src-selector');
+          // If a 'selector' is set, we want more specific elements inside.
+          const selector = this.getAttribute('selector');
           if (selector) {
             templateElement.content.replaceChildren(
               ...templateElement.content.querySelectorAll(selector)

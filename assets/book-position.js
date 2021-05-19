@@ -173,7 +173,6 @@
     }
 
     setPosition (position) {
-      console.log(position);
       this.scrollElement.activateChild(position[0]);
       // Get target element
       let i = 0;

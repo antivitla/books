@@ -29,6 +29,10 @@
       return this.getAttribute('for');
     }
 
+    get indexDepth () {
+      return this.getAttribute('index-depth');
+    }
+
     // get preloadFonts () {
     //   return (this.getAttribute('preload-fonts') || '').split(/\s*,\s*/g);
     // }
@@ -134,7 +138,7 @@
     indexComponentHTML (id) {
       return `
         <aside class="book-index-panel">
-          <book-control for="${id}" type="index"></book-control>
+          <book-control for="${id}" type="index" index-depth="${this.indexDepth}"></book-control>
         </aside>
       `;
     }

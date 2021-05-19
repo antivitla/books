@@ -125,33 +125,41 @@ book-control[type="index"] ul {
   margin-left: 0.75rem;
 }
 
-book-control[type="index"] header[depth="1"]:before {
+book-control[type="index"] li header:before {
   left: calc(-1 * 0.75rem - 1rem);
 }
 
-book-control[type="index"] header[depth="2"]:before {
+book-control[type="index"] li li header:before {
   left: calc(-2 * 0.75rem - 1rem);
 }
 
-book-control[type="index"] header[depth="3"]:before {
+book-control[type="index"] li li li header:before {
   left: calc(-3 * 0.75rem - 1rem);
 }
 
-book-control[type="index"] header[depth="4"]:before {
+book-control[type="index"] li li li li header:before {
   left: calc(-4 * 0.75rem - 1rem);
 }
 
-book-control[type="index"] header[depth="5"]:before {
+book-control[type="index"] li li li li li header:before {
   left: calc(-5 * 0.75rem - 1rem);
 }
 
-book-control[type="index"] header[depth="6"]:before {
+book-control[type="index"] li li li li li li header:before {
   left: calc(-6 * 0.75rem - 1rem);
 }
 
 book-control[type="index"] li {
   list-style: none;
 }
+
+book-control[type="index"][index-depth="2"] li li ul { display: none; }
+book-control[type="index"][index-depth="3"] li li li ul { display: none; }
+book-control[type="index"][index-depth="4"] li li li li ul { display: none; }
+book-control[type="index"][index-depth="5"] li li li li li ul { display: none; }
+book-control[type="index"][index-depth="6"] li li li li li li ul { display: none; }
+book-control[type="index"][index-depth="7"] li li li li li li li ul { display: none; }
+book-control[type="index"][index-depth="8"] li li li li li li li li ul { display: none; }
 
 book-control[type="index"] .author,
 book-control[type="index"] .prefix,

@@ -481,3 +481,16 @@ book-fragment:first-child > h1 {
   text-indent: 0;
   color: var(--book-text-color);
 }
+
+.book blockquote {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+  font-style: italic;
+}
+
+.book blockquote .author {
+  text-align: right;
+  margin-top: 2rem;
+  font-weight: bold;
+  font-size: 87.5%;
+}
