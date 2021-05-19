@@ -18,17 +18,32 @@
     li {
       list-style-type: "— ";
     }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <section class="library">
-    <h2>Книги</h2>
+    <h2 class="toggle-reveal">Книги</h2>
     <ul>
       <li><a href="hegel--nauka-logiki.html">Наука логики. Гегель</a></li>
       <li><a href="marx--kapital.html">Капитал. Маркс</a></li>
-      <li><a href="kastaneda--uchenie-dona-khuana.html">Учение Дона Хуана. Кастанеда</a></li>
-      <li><a href="kastaneda--puteshestvie-v-ikstlan.html">Путешествие в Икстлан. Кастанеда</a></li>
+      <li class="hidden toggle"><a href="kastaneda--uchenie-dona-khuana.html">Учение Дона Хуана. Кастанеда</a></li>
+      <li class="hidden toggle"><a href="kastaneda--puteshestvie-v-ikstlan.html">Путешествие в Икстлан. Кастанеда</a></li>
     </ul>
   </section>
+  <script>
+    document.addEventListener('click', function (event) {
+      if (event.target.closest('.toggle-reveal')) {
+        Array.prototype.forEach.call(
+          document.querySelectorAll('.toggle'),
+          function (element) {
+            element.classList.toggle('hidden');
+          }
+        );
+      }
+    });
+  </script>
 </body>
 </html>
