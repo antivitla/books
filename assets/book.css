@@ -396,6 +396,10 @@ book-fragment:first-child > h1 {
   display: block;
 }
 
+.book div.footnote p + p {
+  text-indent: 2rem;
+}
+
 /* Math */
 
 .book .math {
@@ -420,6 +424,7 @@ book-fragment:first-child > h1 {
 
 .book .poem {
   margin: 1rem 0 1rem 3rem;
+  text-indent: 0 !important;
 }
 
 .book .annotation {
