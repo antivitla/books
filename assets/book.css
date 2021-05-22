@@ -94,6 +94,14 @@ body {
   padding-left: 3.5rem;
 }
 
+.book li {
+  margin-bottom: 0.5rem;
+}
+
+.book li:last-child {
+  margin-bottom: 0;
+}
+
 .book p {
   margin: 0.75rem 0;
   text-indent: 2.5rem;
@@ -122,6 +130,7 @@ body {
   font-family: var(--book-header-font-family);
   margin: 1rem auto;
   text-align: center;
+  max-width: 80%;
 }
 
 .book h1,
