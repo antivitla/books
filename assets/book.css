@@ -371,6 +371,10 @@ book-fragment:first-child > h1 {
   text-indent: 0;
 }
 
+.book header .description[index-only] {
+  display: none;
+}
+
 /* Footnotes */
 
 .book a.footnote {

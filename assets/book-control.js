@@ -376,7 +376,8 @@
               position: [fragmentIndex, headerIndex],
               depth: parseInt(header.tagName.replace(/^(h|H)/, ''), 10),
               prefix: complexHeader?.querySelector('.prefix')?.textContent,
-              author: complexHeader?.querySelector('.author')?.textContent
+              author: complexHeader?.querySelector('.author')?.textContent,
+              description: complexHeader?.querySelector('.description')?.textContent,
             });
           });
         }
@@ -987,10 +988,13 @@
     }
 
     indexBranchHTML (branch) {
+      const description = branch.description
+        ? `<div class="description">${branch.description}</div>`
+        : '';
       if (!branch.children || !branch.children.length) {
-        return `<li>${this.headerLinkHTML(branch)}</li>`;
+        return `<li>${this.headerLinkHTML(branch)}${description}</li>`;
       } else {
-        return `<li>${this.headerLinkHTML(branch)}<ul>${
+        return `<li>${this.headerLinkHTML(branch)}${description}<ul>${
           branch.children.map(child => this.indexBranchHTML(child)).join('')
         }</ul></li>`;
       }

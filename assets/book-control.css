@@ -183,6 +183,11 @@ book-control[type="index"] .prefix {
   margin-bottom: 0.25rem;
 }
 
+book-control[type="index"] .description {
+  font-size: 14px;
+  font-style: italic;
+}
+
 book-control[type="index"] [depth="1"] .author + .title,
 book-control[type="index"] [depth="1"] .prefix + .title,
 book-control[type="index"] [depth="2"] .author + .title,
