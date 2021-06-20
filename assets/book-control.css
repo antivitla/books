@@ -152,6 +152,22 @@ book-control[type="index"] li li li li li li header:before {
   left: calc(-6 * 0.75rem - 1rem);
 }
 
+book-control[type="index"] li li li li li li li header:before {
+  left: calc(-7 * 0.75rem - 1rem);
+}
+
+book-control[type="index"] li li li li li li li li header:before {
+  left: calc(-8 * 0.75rem - 1rem);
+}
+
+book-control[type="index"] li li li li li li li li li header:before {
+  left: calc(-9 * 0.75rem - 1rem);
+}
+
+book-control[type="index"] li li li li li li li li li li header:before {
+  left: calc(-10 * 0.75rem - 1rem);
+}
+
 book-control[type="index"] li {
   list-style: none;
 }

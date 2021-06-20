@@ -1,6 +1,8 @@
 @import url("fonts/material-icons.css");
 @import url("fonts/kazimir-text.css");
 @import url("fonts/old-standard.css");
+@import url('fonts/exo.css'); /* Font family for curly braces to use inside inline styles */
+@import url('fonts/math.css');
 
 html {
   --book-high-emphasis: 0.875;
@@ -24,9 +26,11 @@ html {
   --book-text-color: rgba(0, 0, 0, var(--book-high-emphasis));
   --book-text-muted-color: rgba(0, 0, 0, var(--book-medium-emphasis));
   --book-text-disabled-color: rgba(0, 0, 0, var(--book-low-emphasis));
+  --book-text-invert-color: rgba(255, 255, 255, var(--book-high-emphasis));
   --book-background-color: var(--book-light-background-color);
   --book-fill-color: rgba(0, 0, 0, var(--book-medium-emphasis));
   --book-fill-muted-color: rgba(0, 0, 0, var(--book-low-emphasis));
+  --book-panel-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.125);
 }
 
 [theme="light"] {
@@ -113,6 +117,11 @@ body {
 .book .footnote p,
 .book p[class] {
   text-indent: 0;
+}
+
+.book pre {
+  font-family: inherit;
+  margin: 0;
 }
 
 /* Header */
@@ -416,21 +425,31 @@ book-fragment:first-child > h1 {
 /* Math */
 
 .book .math {
-  font-style: italic;
+  font-family: 'Math', 'Kazimir Text', 'Georgia';
+}
+
+.book .math sub {
+  font-size: 62.5%;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.375em;
+
 }
 
 .book .fraction sup {
   font-size: 75%;
   vertical-align: baseline;
   position: relative;
-  top: -0.625em;
+  top: -0.5em;
+  margin-right: -0.25rem;
 }
 
 .book .fraction sub {
   font-size: 75%;
   vertical-align: baseline;
   position: relative;
-  top: 0.375em;
+  top: 0.25em;
+  margin-left: -0.125rem;
 }
 
 /* Unsorted */

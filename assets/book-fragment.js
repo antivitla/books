@@ -68,6 +68,7 @@
           this.innerHTML = `<template>${this.innerHTML}</template>`;
         } else if (isActive && isWrapped) {
           this.innerHTML = this.innerHTML.slice('<template>'.length, -1 * '</template>'.length);
+          this.dispatchEvent(new CustomEvent('active', {bubbles: true}));
         }
       }
 
