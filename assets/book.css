@@ -13,8 +13,8 @@ html {
   --book-dark-background-color: #303030;
   --book-light-background-color: whitesmoke;
 
-  --book-text-font-family: "Kazimir Text", "Georgia", serif;
-  --book-header-font-family: "Old Standard", "Times New Roman", serif;
+  --book-text-font-family: "Kazimir Text", serif;
+  --book-header-font-family: "Old Standard", serif;
 
   --book-max-width: 40rem;
 
@@ -425,7 +425,15 @@ book-fragment:first-child > h1 {
 /* Math */
 
 .book .math {
-  font-family: 'Math', 'Kazimir Text', 'Georgia';
+  font-family: 'Math', 'Kazimir Text';
+  display: inline-block;
+  vertical-align: baseline;
+  text-indent: 0;
+  margin: 0 0.125rem;
+}
+
+.book mjx-container {
+  margin: 0 0.125rem;
 }
 
 .book .math sub {
@@ -433,7 +441,13 @@ book-fragment:first-child > h1 {
   vertical-align: baseline;
   position: relative;
   top: 0.375em;
+}
 
+.book .math sup {
+  font-size: 62.5%;
+  vertical-align: baseline;
+  position: relative;
+  top: -0.75em;
 }
 
 .book .fraction sup {

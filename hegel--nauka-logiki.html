@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Наука логики. Гегель</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Book -->
   <link href="assets/book-control.css" rel="stylesheet">
   <link href="assets/book-reader.css" rel="stylesheet">
   <link href="assets/book.css" rel="stylesheet">
@@ -14,6 +15,23 @@
   <script src="assets/book-control.js"></script>
   <script src="assets/book-scroll.js"></script>
   <script src="assets/book-reader.js"></script>
+  <!-- Math -->
+  <!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> -->
+  <script>
+    window.MathJax = {
+      // tex: {
+      //   inlineMath: [['\(', '`']]
+      // },
+      chtml: {
+        fontURL: 'assets/fonts',
+        minScale: 1.125,
+        scale: 1.125,
+        matchFontHeight: true
+      }
+    };
+    document.addEventListener('active', () => MathJax.typeset());
+  </script>
+  <script src="assets/mathjax-tex-chtml.js"></script>
 </head>
 <body>
 <book-scroll id="hegel--nauka-logiki">
