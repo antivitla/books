@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Капитал. Маркс</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Book -->
   <link href="assets/book-control.css" rel="stylesheet">
   <link href="assets/book-reader.css" rel="stylesheet">
   <link href="assets/book.css" rel="stylesheet">
@@ -14,6 +15,17 @@
   <script src="assets/book-control.js"></script>
   <script src="assets/book-scroll.js"></script>
   <script src="assets/book-reader.js"></script>
+  <!-- Math -->
+  <!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> -->
+  <!-- <script>
+    window.MathJax = {
+      chtml: {
+        fontURL: 'assets/fonts'
+      }
+    };
+    document.addEventListener('active', () => MathJax.typeset());
+  </script>
+  <script src="assets/mathjax-tex-chtml.js"></script> -->
 </head>
 <body>
 <book-scroll id="marx--kapital">
@@ -28,6 +40,7 @@
   <book-fragment class="book" src="marx--kapital/kniga-1--otdel-1--tovar.html" selector="section > *"></book-fragment>
   <book-fragment class="book" src="marx--kapital/kniga-1--otdel-1--dvoystvennyy-kharakter-zaklyuchayuschegosya-v-tovarakh-truda.html" selector="section > *"></book-fragment>
   <book-fragment class="book" src="marx--kapital/kniga-1--otdel-1--forma-stoimosti--ili-menovaya-stoimost.html" selector="section > *"></book-fragment>
+  <book-fragment class="book" src="marx--kapital/footer.html" selector="section > *"></book-fragment>
 </book-scroll>
 <book-reader for="marx--kapital"></book-reader>
 </body>
